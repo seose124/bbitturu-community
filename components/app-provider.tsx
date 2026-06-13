@@ -26,9 +26,11 @@ type AppContextValue = {
   hydrated: boolean;
   attempts: Record<number, Attempt>;
   addChallenge: (input: {
-    handwriting: string;
+    handwriting?: string;
+    imageData?: string;
     answer: string;
-    difficulty: Difficulty;
+    hint?: string;
+    difficulty?: Difficulty;
   }) => Challenge;
   getChallenge: (id: number) => Challenge | undefined;
   saveAttempt: (id: number, answer: string, passed?: boolean) => void;
@@ -83,19 +85,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
   const addChallenge = useCallback(
     (input: {
-      handwriting: string;
+      handwriting?: string;
+      imageData?: string;
       answer: string;
-      difficulty: Difficulty;
+      hint?: string;
+      difficulty?: Difficulty;
     }) => {
+      const autoHint =
+        input.answer && input.answer !== "나도 못읽겠어요 🤷"
+          ? `총 ${input.answer.replace(/\s/g, "").length}글자예요`
+          : "힌트가 없어요";
       const challenge: Challenge = {
         id: Date.now(),
-        handwriting: input.handwriting,
+        handwriting: input.handwriting ?? "",
+        imageData: input.imageData,
         answer: input.answer,
         author: "나",
-        difficulty: input.difficulty,
+        difficulty: input.difficulty ?? "보통",
         successRate: Math.floor(Math.random() * 55) + 5,
         tries: 0,
-        hint: `총 ${input.answer.replace(/\s/g, "").length}글자예요`,
+        hint: input.hint ?? autoHint,
         tags: ["new"],
       };
       setChallenges((current) => [challenge, ...current]);

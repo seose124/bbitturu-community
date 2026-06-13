@@ -4,6 +4,7 @@ export type ChallengeTag = "hot" | "new" | "hard" | "easy";
 export type Challenge = {
   id: number;
   handwriting: string;
+  imageData?: string;
   answer: string;
   author: string;
   difficulty: Difficulty;

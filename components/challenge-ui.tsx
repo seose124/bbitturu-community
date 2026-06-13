@@ -30,7 +30,11 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
   return (
     <Link className="challenge-list-item" href={`/challenges/${challenge.id}`}>
       <div className="challenge-thumb">
-        <span className="challenge-thumb-text">{challenge.handwriting}</span>
+        {challenge.imageData ? (
+          <img src={challenge.imageData} alt="악필" className="challenge-thumb-img" />
+        ) : (
+          <span className="challenge-thumb-text">{challenge.handwriting}</span>
+        )}
       </div>
       <div className="challenge-list-copy">
         <div className="challenge-meta">
@@ -71,7 +75,11 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   return (
     <article className="home-challenge-card">
       <div className="home-writing">
-        <span className="handwriting">{challenge.handwriting}</span>
+        {challenge.imageData ? (
+          <img src={challenge.imageData} alt="악필 이미지" className="home-writing-img" />
+        ) : (
+          <span className="handwriting">{challenge.handwriting}</span>
+        )}
       </div>
       <form className="home-answer" onSubmit={submit}>
         <h3>뭐라고 쓴 건지 읽어보세요 🤔</h3>

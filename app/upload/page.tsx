@@ -1,34 +1,60 @@
 "use client";
 
-import { FormEvent, useState } from "react";
-import { Rocket } from "lucide-react";
+import { FormEvent, useRef, useState } from "react";
+import { Camera, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
-import type { Difficulty } from "@/lib/challenges";
 
-const difficulties: Array<{ value: Difficulty; label: string }> = [
-  { value: "쉬움", label: "😊 쉬움" },
-  { value: "보통", label: "보통" },
-  { value: "어려움", label: "🥵 어려움" },
-  { value: "악필의 끝", label: "💀 악필의 끝" },
-];
+function compressImage(file: File): Promise<string> {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onerror = () => reject(new Error("파일을 읽을 수 없어요"));
+    reader.onload = (e) => {
+      const img = new Image();
+      img.onerror = () => reject(new Error("이미지를 처리할 수 없어요"));
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const MAX = 800;
+        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
+        canvas.width = Math.round(img.width * scale);
+        canvas.height = Math.round(img.height * scale);
+        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
+        resolve(canvas.toDataURL("image/jpeg", 0.7));
+      };
+      img.src = e.target?.result as string;
+    };
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function UploadPage() {
   const router = useRouter();
   const { addChallenge, showToast } = useBbiduru();
-  const [handwriting, setHandwriting] = useState("");
+  const [image, setImage] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
-  const [difficulty, setDifficulty] = useState<Difficulty>("보통");
-  const valid = Boolean(handwriting.trim() && answer.trim());
+  const [hint, setHint] = useState("");
+  const [unreadable, setUnreadable] = useState(false);
+  const fileRef = useRef<HTMLInputElement>(null);
+  const valid = Boolean(image && (answer.trim() || unreadable));
+
+  const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    try {
+      setImage(await compressImage(file));
+    } catch {
+      showToast("이미지를 처리할 수 없어요");
+    }
+  };
 
   const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!valid) return;
     addChallenge({
-      handwriting: handwriting.trim(),
-      answer: answer.trim(),
-      difficulty,
+      imageData: image!,
+      answer: unreadable ? "나도 못읽겠어요 🤷" : answer.trim(),
+      hint: hint.trim() || undefined,
     });
     showToast("챌린지가 공개됐어요!");
     router.push("/");
@@ -44,57 +70,76 @@ export default function UploadPage() {
             <p className="page-subtitle">판독단이 읽어드릴게요 😈</p>
           </div>
 
-          <label className="field">
-            <span>악필 텍스트 입력</span>
-            <div className="textarea-wrap">
-              <textarea
-                className="input textarea"
-                value={handwriting}
-                onChange={(event) => setHandwriting(event.target.value)}
-                placeholder="예: 오늘밥뭐먹을지모르겠다..."
-                maxLength={50}
+          <div className="field">
+            <span>악필 사진 업로드</span>
+            <label className="upload-image-area">
+              {image ? (
+                <img src={image} alt="악필 미리보기" className="upload-image-preview" />
+              ) : (
+                <div className="upload-image-placeholder">
+                  <Camera size={30} />
+                  <span>탭하여 사진 선택</span>
+                </div>
+              )}
+              <input
+                ref={fileRef}
+                type="file"
+                accept="image/*"
+                onChange={handleImageChange}
+                className="upload-image-input"
               />
-              <small>{handwriting.length}/50</small>
-            </div>
-          </label>
+            </label>
+            {image ? (
+              <button
+                type="button"
+                className="button button-ghost button-small"
+                onClick={() => {
+                  setImage(null);
+                  if (fileRef.current) fileRef.current.value = "";
+                }}
+              >
+                다시 선택
+              </button>
+            ) : null}
+          </div>
 
-          {handwriting.trim() ? (
-            <div className="preview-block">
-              <span className="field-label">판독단 눈에 이렇게 보여요</span>
-              <div className="card preview-card outlined">
-                <span className="handwriting">{handwriting}</span>
-              </div>
-            </div>
-          ) : null}
-
-          <div className="divider" />
-
-          <label className="field">
-            <span>실제 정답 (판독 후 공개)</span>
+          <div className="field">
+            <span>실제 정답</span>
             <input
               className="input"
               value={answer}
-              onChange={(event) => setAnswer(event.target.value)}
+              onChange={(e) => {
+                setAnswer(e.target.value);
+                if (unreadable) setUnreadable(false);
+              }}
               placeholder="올바른 텍스트를 입력하세요"
+              disabled={unreadable}
               maxLength={50}
             />
-          </label>
+            <button
+              type="button"
+              className={`button button-ghost button-small${unreadable ? " button-unreadable-active" : ""}`}
+              onClick={() => {
+                setUnreadable(!unreadable);
+                setAnswer("");
+              }}
+            >
+              나도 못읽겠어요 🤷
+            </button>
+          </div>
 
-          <fieldset className="field fieldset">
-            <legend>예상 난이도</legend>
-            <div className="difficulty-picker">
-              {difficulties.map((item) => (
-                <button
-                  className={`filter-chip ${difficulty === item.value ? "active" : ""}`}
-                  type="button"
-                  key={item.value}
-                  onClick={() => setDifficulty(item.value)}
-                >
-                  {item.label}
-                </button>
-              ))}
-            </div>
-          </fieldset>
+          <div className="field">
+            <span>
+              힌트&nbsp;<em className="field-optional">(선택)</em>
+            </span>
+            <input
+              className="input"
+              value={hint}
+              onChange={(e) => setHint(e.target.value)}
+              placeholder="예: 총 5글자예요"
+              maxLength={40}
+            />
+          </div>
 
           <button
             className="button button-primary upload-submit"

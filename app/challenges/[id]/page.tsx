@@ -64,7 +64,11 @@ export default function ChallengePage() {
           <article className="card outlined">
             <div className="challenge-stage">
               <div className="paper">
-                <span className="handwriting">{challenge.handwriting}</span>
+                {challenge.imageData ? (
+                  <img src={challenge.imageData} alt="악필 이미지" className="paper-img" />
+                ) : (
+                  <span className="handwriting">{challenge.handwriting}</span>
+                )}
               </div>
               <div className="author-line">
                 <span>
