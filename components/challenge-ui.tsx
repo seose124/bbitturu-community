@@ -30,14 +30,11 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
   return (
     <Link className="challenge-list-item" href={`/challenges/${challenge.id}`}>
       <div className="challenge-thumb">
-        {challenge.handwriting.split("\n")[0]}
+        <span className="challenge-thumb-text">{challenge.handwriting}</span>
       </div>
       <div className="challenge-list-copy">
-        <div className="challenge-list-writing">
-          {challenge.handwriting.replace(/\n/g, " ")}
-        </div>
         <div className="challenge-meta">
-          {challenge.author} · 판독 {challenge.tries}명
+          판독 {challenge.tries}명 · {challenge.author}
         </div>
         <div className="badge-row">
           <DifficultyBadge challenge={challenge} />
@@ -53,7 +50,7 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
       </div>
       <div className="challenge-rate">
         <strong className={rateClass}>{challenge.successRate}%</strong>
-        <span>판독률</span>
+        <span>평균 판독률</span>
       </div>
     </Link>
   );

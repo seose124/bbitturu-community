@@ -43,26 +43,6 @@ export default function HomePage() {
           }
         />
         <div className="scroll-content home-content">
-          <section className="status-card">
-            <div className="status-orb status-orb-one" />
-            <div className="status-orb status-orb-two" />
-            <p className="eyebrow dark-eyebrow">오늘의 현황</p>
-            <div className="status-grid">
-              <div>
-                <strong className="accent-text">247</strong>
-                <span>진행 중</span>
-              </div>
-              <div>
-                <strong>1.2k</strong>
-                <span>오늘 판독</span>
-              </div>
-              <div>
-                <strong className="accent-text">34%</strong>
-                <span>평균 판독률</span>
-              </div>
-            </div>
-          </section>
-
           <section>
             <div className="section-heading">
               <h2>🔥 인기 챌린지</h2>

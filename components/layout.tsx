@@ -10,7 +10,7 @@ import {
   UserRound,
   type LucideIcon,
 } from "lucide-react";
-import type { ReactNode } from "react";
+import { type ReactNode, useEffect, useState } from "react";
 
 export function Page({
   children,
@@ -115,6 +115,22 @@ export function BottomNav() {
 
 export function FloatingUpload() {
   const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    setVisible(true);
+    const el = document.querySelector(".scroll-content") as HTMLElement | null;
+    if (!el) return;
+    let last = 0;
+    const onScroll = () => {
+      const y = el.scrollTop;
+      setVisible(y <= 40 || y < last);
+      last = y;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [pathname]);
+
   const hidden =
     pathname.startsWith("/upload") ||
     /^\/challenges\/\d+/.test(pathname) ||
@@ -123,8 +139,13 @@ export function FloatingUpload() {
   if (hidden) return null;
 
   return (
-    <Link className="floating-upload" href="/upload" aria-label="악필 업로드">
-      <Plus size={27} strokeWidth={2} />
+    <Link
+      className={`floating-upload${visible ? "" : " floating-upload-hidden"}`}
+      href="/upload"
+      aria-label="악필 업로드"
+    >
+      <Plus size={22} strokeWidth={2.5} />
+      <span>업로드</span>
     </Link>
   );
 }

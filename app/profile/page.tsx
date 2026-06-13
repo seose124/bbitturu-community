@@ -1,19 +1,16 @@
 "use client";
 
 import {
-  Bell,
   ChevronRight,
   Flame,
   Link as LinkIcon,
-  RotateCcw,
   Search,
-  Settings,
 } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { BottomNav, Page, TopBar } from "@/components/layout";
 
 export default function ProfilePage() {
-  const { challenges, attempts, resetApp, showToast } = useBbiduru();
+  const { challenges, attempts, showToast } = useBbiduru();
   const uploaded = challenges.filter((challenge) => challenge.author === "나")
     .length;
   const attemptCount = Object.keys(attempts).length;
@@ -21,18 +18,7 @@ export default function ProfilePage() {
   return (
     <Page>
       <div className="page-column">
-        <TopBar
-          logo="마이페이지"
-          right={
-            <button
-              className="icon-button"
-              onClick={() => showToast("설정 기능을 준비하고 있어요")}
-              aria-label="설정"
-            >
-              <Settings size={19} />
-            </button>
-          }
-        />
+        <TopBar logo="마이페이지" />
         <div className="scroll-content profile-content">
           <section className="profile-header">
             <div className="avatar">삐</div>
@@ -85,21 +71,9 @@ export default function ProfilePage() {
           </section>
 
           <section className="card outlined profile-menu">
-            <button onClick={() => showToast("알림 설정을 준비하고 있어요")}>
-              <Bell size={18} />
-              <span>알림 설정</span>
-              <ChevronRight size={16} />
-            </button>
-            <div className="divider" />
             <button onClick={() => showToast("친구 초대 링크를 복사했어요")}>
               <LinkIcon size={18} />
               <span>친구 초대하기</span>
-              <ChevronRight size={16} />
-            </button>
-            <div className="divider" />
-            <button onClick={resetApp}>
-              <RotateCcw size={18} />
-              <span>앱 초기화</span>
               <ChevronRight size={16} />
             </button>
           </section>
