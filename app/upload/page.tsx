@@ -30,11 +30,12 @@ function compressImage(file: File): Promise<string> {
 
 export default function UploadPage() {
   const router = useRouter();
-  const { addChallenge, showToast } = useBbiduru();
+  const { user, addChallenge, showToast } = useBbiduru();
   const [image, setImage] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [hint, setHint] = useState("");
   const [unreadable, setUnreadable] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const valid = Boolean(image && (answer.trim() || unreadable));
 
@@ -48,16 +49,27 @@ export default function UploadPage() {
     }
   };
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!valid) return;
-    addChallenge({
-      imageData: image!,
-      answer: unreadable ? "나도 못읽겠어요 🤷" : answer.trim(),
-      hint: hint.trim() || undefined,
-    });
-    showToast("챌린지가 공개됐어요!");
-    router.push("/");
+    if (!valid || submitting) return;
+    if (!user) {
+      showToast("로그인이 필요해요");
+      router.push("/login");
+      return;
+    }
+    setSubmitting(true);
+    try {
+      await addChallenge({
+        imageData: image!,
+        answer: unreadable ? "나도 못읽겠어요 🤷" : answer.trim(),
+        hint: hint.trim() || undefined,
+      });
+      showToast("챌린지가 공개됐어요!");
+      router.push("/");
+    } catch {
+      showToast("업로드에 실패했어요. 다시 시도해주세요.");
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -144,9 +156,9 @@ export default function UploadPage() {
           <button
             className="button button-primary upload-submit"
             type="submit"
-            disabled={!valid}
+            disabled={!valid || submitting}
           >
-            <Rocket size={18} /> 챌린지 공개하기
+            <Rocket size={18} /> {submitting ? "업로드 중..." : "챌린지 공개하기"}
           </button>
         </form>
       </div>

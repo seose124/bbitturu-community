@@ -7,6 +7,7 @@ export type Challenge = {
   imageData?: string;
   answer: string;
   author: string;
+  authorId?: string;
   difficulty: Difficulty;
   successRate: number;
   tries: number;

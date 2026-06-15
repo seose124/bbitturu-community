@@ -1289,6 +1289,31 @@ p {
   opacity: 0.55;
 }
 
+.field-error {
+  font-size: 13px;
+  color: var(--danger);
+}
+
+.login-sent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 12px;
+  padding: 32px 0;
+}
+
+.login-sent-icon {
+  font-size: 48px;
+  line-height: 1;
+}
+
+.profile-email {
+  font-size: 13px;
+  color: var(--ink-sub);
+  margin: 2px 0 6px;
+}
+
 .challenge-thumb-img {
   width: 100%;
   height: 100%;

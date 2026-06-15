@@ -2,7 +2,7 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { FormEvent, useState } from "react";
-import { Flame, Lightbulb } from "lucide-react";
+import { Flame, Lightbulb, Trash2 } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { DifficultyBadge } from "@/components/challenge-ui";
 import { Page, TopBar } from "@/components/layout";
@@ -10,9 +10,11 @@ import { Page, TopBar } from "@/components/layout";
 export default function ChallengePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { challenges, getChallenge, saveAttempt } = useBbiduru();
+  const { user, challenges, getChallenge, saveAttempt, deleteChallenge, showToast } =
+    useBbiduru();
   const challenge = getChallenge(Number(params.id));
   const [answer, setAnswer] = useState("");
+  const [deleting, setDeleting] = useState(false);
 
   if (!challenge) {
     return (
@@ -33,6 +35,7 @@ export default function ChallengePage() {
     );
   }
 
+  const canDelete = Boolean(user && challenge.authorId && user.id === challenge.authorId);
   const index = challenges.findIndex((item) => item.id === challenge.id);
   const progress = ((index + 1) / challenges.length) * 100;
 
@@ -48,12 +51,37 @@ export default function ChallengePage() {
     router.push(`/challenges/${challenge.id}/result`);
   };
 
+  const handleDelete = async () => {
+    if (!confirm("이 챌린지를 삭제할까요?")) return;
+    setDeleting(true);
+    try {
+      await deleteChallenge(challenge.id);
+      showToast("챌린지가 삭제됐어요");
+      router.push("/challenges");
+    } catch {
+      showToast("삭제에 실패했어요. 다시 시도해주세요.");
+      setDeleting(false);
+    }
+  };
+
   return (
     <Page>
       <div className="page-column">
         <TopBar
           title={`${index + 1} / ${challenges.length}`}
           backHref="/challenges"
+          right={
+            canDelete ? (
+              <button
+                className="icon-button"
+                onClick={handleDelete}
+                disabled={deleting}
+                aria-label="챌린지 삭제"
+              >
+                <Trash2 size={19} strokeWidth={2} />
+              </button>
+            ) : undefined
+          }
         />
         <div className="progress-wrap">
           <div className="progress-track">
