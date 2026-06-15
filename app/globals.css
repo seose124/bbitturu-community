@@ -36,6 +36,7 @@ body {
   width: 100%;
   min-height: 100%;
   margin: 0;
+  overflow-x: hidden;
 }
 
 html {
@@ -1701,35 +1702,8 @@ p {
   }
 }
 
-.desktop-nav {
+.desktop-upload-btn {
   display: none;
-}
-
-.desktop-nav-btn {
-  padding: 8px 20px;
-  border-radius: 10px;
-  font-family: "BMKkubulim", sans-serif;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--ink-sub);
-  cursor: pointer;
-  transition:
-    background 150ms ease,
-    color 150ms ease;
-  border: none;
-  background: none;
-  white-space: nowrap;
-  text-decoration: none;
-}
-
-.desktop-nav-btn:hover {
-  background: rgb(0 0 0 / 6%);
-  color: var(--ink);
-}
-
-.desktop-nav-btn.dsk-active {
-  background: var(--primary-light);
-  color: var(--primary-dark);
 }
 
 @media (min-width: 768px) {
@@ -1746,14 +1720,9 @@ p {
     box-shadow: none;
   }
 
-  .bottom-nav {
-    display: none !important;
-  }
-
   .topbar {
     padding: 0 48px;
     height: 64px;
-    position: relative;
   }
 
   .topbar-logo {
@@ -1761,26 +1730,32 @@ p {
   }
 
   .topbar-action {
+    margin-left: auto;
     flex: 0 0 auto;
   }
 
-  .desktop-nav {
-    display: flex;
-    gap: 4px;
+  .desktop-upload-btn {
+    display: inline-flex;
     align-items: center;
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    pointer-events: none;
+    gap: 6px;
+    margin-right: 12px;
+    padding: 9px 18px;
+    border-radius: 12px;
+    background: var(--ink);
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 700;
+    white-space: nowrap;
+    text-decoration: none;
+    transition: opacity 120ms ease;
   }
 
-  .desktop-nav > * {
-    pointer-events: auto;
+  .desktop-upload-btn:hover {
+    opacity: 0.85;
   }
 
   .floating-upload {
-    bottom: 36px;
+    bottom: calc(80px + var(--safe-bottom));
     right: 48px;
   }
 
@@ -1816,7 +1791,7 @@ p {
   }
 
   .toast {
-    bottom: 36px;
+    bottom: calc(88px + var(--safe-bottom));
   }
 }
 

@@ -38,20 +38,18 @@ const navItems: Array<{
   },
 ];
 
-function DesktopNav() {
+function UploadTopBtn() {
   const pathname = usePathname();
+  const hidden =
+    pathname.startsWith("/upload") ||
+    /^\/challenges\/\d+/.test(pathname) ||
+    ["/about", "/privacy", "/terms", "/contact"].includes(pathname);
+  if (hidden) return null;
   return (
-    <nav className="desktop-nav" aria-label="주요 메뉴">
-      {navItems.map((item) => (
-        <Link
-          key={item.href}
-          href={item.href}
-          className={`desktop-nav-btn${item.match(pathname) ? " dsk-active" : ""}`}
-        >
-          {item.label}
-        </Link>
-      ))}
-    </nav>
+    <Link href="/upload" className="desktop-upload-btn">
+      <Plus size={15} strokeWidth={2.5} />
+      내 글씨 올리기
+    </Link>
   );
 }
 
@@ -102,7 +100,7 @@ export function TopBar({
         <div className="topbar-logo">{logo}</div>
       )}
       {title ? <h1 className="topbar-title">{title}</h1> : null}
-      <DesktopNav />
+      <UploadTopBtn />
       <div className="topbar-action">{right}</div>
     </header>
   );
