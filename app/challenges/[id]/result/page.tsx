@@ -6,14 +6,48 @@ import { Check, Share2, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
-import { answerSimilarity } from "@/lib/similarity";
+import { answerSimilarity, charMatchRate } from "@/lib/similarity";
 
 const initialReactions = [
-  { icon: "😂", count: 32 },
-  { icon: "🤯", count: 18 },
-  { icon: "👏", count: 24 },
-  { icon: "🤔", count: 9 },
+  { icon: "😂", count: 0 },
+  { icon: "🤯", count: 0 },
+  { icon: "👏", count: 0 },
+  { icon: "🤔", count: 0 },
 ];
+
+function ColorizedAnswer({
+  answer,
+  attempt,
+}: {
+  answer: string;
+  attempt: string;
+}) {
+  const normAnswer = answer.replace(/\s/g, "");
+  let normIdx = 0;
+
+  const chars = attempt.split("").map((char) => {
+    if (char === " ") return { char, correct: null as boolean | null };
+    const correct = normIdx < normAnswer.length && char === normAnswer[normIdx];
+    normIdx++;
+    return { char, correct };
+  });
+
+  return (
+    <>
+      &ldquo;
+      {chars.map((item, i) =>
+        item.correct === null ? (
+          <span key={i}> </span>
+        ) : (
+          <span key={i} className={item.correct ? "char-correct" : "char-wrong"}>
+            {item.char}
+          </span>
+        ),
+      )}
+      &rdquo;
+    </>
+  );
+}
 
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
@@ -40,6 +74,11 @@ export default function ResultPage() {
     [attempt, challenge],
   );
 
+  const myRate = useMemo(() => {
+    if (!challenge || !attempt || attempt.passed) return 0;
+    return Math.round(charMatchRate(challenge.answer, attempt.answer) * 100);
+  }, [challenge, attempt]);
+
   useEffect(() => {
     if (correct) showToast("정답! 대단해요 🎉");
   }, [correct, showToast]);
@@ -59,21 +98,43 @@ export default function ResultPage() {
 
   const currentIndex = challenges.findIndex((item) => item.id === challenge.id);
   const nextChallenge = challenges[(currentIndex + 1) % challenges.length];
-  const displayAnswer = attempt
-    ? attempt.passed
-      ? "패스했어요 😅"
-      : `"${attempt.answer}"`
-    : "아직 답하지 않았어요";
+  const avgRate = challenge.successRate;
 
   return (
     <Page>
       <div className="page-column">
         <TopBar title="결과 공개" backHref="/challenges" />
         <div className="scroll-content result-content">
+
+          {/* 1. 악필 문제 이미지 상단 표기 */}
+          <div className="card outlined result-preview">
+            {challenge.imageData ? (
+              <img
+                src={challenge.imageData}
+                alt="악필 이미지"
+                className="result-preview-img"
+              />
+            ) : (
+              <div className="result-preview-text">
+                <span className="handwriting">{challenge.handwriting}</span>
+              </div>
+            )}
+          </div>
+
+          {/* 2. 나의 판독 + 3. 맞춘/틀린 색상 구분 */}
           <div className="card answer-summary outlined">
             <div>
-              <span>내 정답</span>
-              <strong>{displayAnswer}</strong>
+              <span>나의 판독</span>
+              <strong>
+                {!attempt || attempt.passed ? (
+                  attempt ? "패스했어요 😅" : "아직 답하지 않았어요"
+                ) : (
+                  <ColorizedAnswer
+                    answer={challenge.answer}
+                    attempt={attempt.answer}
+                  />
+                )}
+              </strong>
             </div>
             <span className={`result-icon ${correct ? "correct" : "wrong"}`}>
               {correct ? <Check size={20} /> : <X size={20} />}
@@ -86,20 +147,27 @@ export default function ResultPage() {
               <h2>&ldquo;{challenge.answer}&rdquo;</h2>
             </div>
             <div className="result-details">
+
+              {/* 5. 나의 판독 성공률 + 평균 눈금·텍스트 */}
               <div className="result-rate-line">
-                <span>판독 성공률</span>
-                <strong>{challenge.successRate}%</strong>
+                <span>나의 판독 성공률</span>
+                <strong>{myRate}%</strong>
               </div>
-              <div className="progress-track">
-                <div
-                  className="progress-fill success-fill"
-                  style={{
-                    width: progressVisible
-                      ? `${challenge.successRate}%`
-                      : "0%",
-                  }}
-                />
+              <div className="result-progress-wrap">
+                <div className="progress-track">
+                  <div
+                    className="progress-fill success-fill"
+                    style={{ width: progressVisible ? `${myRate}%` : "0%" }}
+                  />
+                </div>
+                <div className="avg-marker" style={{ left: `${avgRate}%` }} />
               </div>
+              <div className="avg-label-wrap">
+                <span className="avg-label" style={{ left: `${avgRate}%` }}>
+                  평균 {avgRate}%
+                </span>
+              </div>
+
               <div className="reaction-row">
                 {initialReactions.map((reaction, index) => {
                   const active = liked.includes(index);
@@ -122,18 +190,21 @@ export default function ResultPage() {
                 })}
               </div>
               <div className="divider" />
+
+              {/* 6. '결과 공유하기' */}
               <Link
                 className="button button-primary"
                 href={`/challenges/${challenge.id}/share`}
               >
                 <Share2 size={17} />
-                결과 공유 · {challenge.successRate}%만 판독 성공
+                결과 공유하기
               </Link>
             </div>
           </article>
 
+          {/* 7. 다음 챌린지 도전 — 더 잘 보이는 컬러 */}
           <button
-            className="button button-secondary"
+            className="button button-green"
             onClick={() => router.push(`/challenges/${nextChallenge.id}`)}
           >
             다음 챌린지 도전 →

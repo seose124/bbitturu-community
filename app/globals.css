@@ -879,6 +879,67 @@ p {
   color: var(--danger);
 }
 
+/* 결과 페이지 - 악필 이미지 미리보기 */
+.result-preview {
+  overflow: hidden;
+}
+
+.result-preview-img {
+  display: block;
+  width: 100%;
+  max-height: 200px;
+  object-fit: contain;
+  background: var(--surface);
+}
+
+.result-preview-text {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 120px;
+  padding: 20px;
+  background: var(--surface);
+}
+
+/* 글자별 색상 구분 */
+.char-correct {
+  color: var(--success);
+}
+
+.char-wrong {
+  color: var(--danger);
+}
+
+/* 판독 성공률 바 + 평균 마커 */
+.result-progress-wrap {
+  position: relative;
+}
+
+.avg-marker {
+  position: absolute;
+  top: -4px;
+  bottom: -4px;
+  width: 2px;
+  transform: translateX(-50%);
+  background: var(--ink-sub);
+  border-radius: 2px;
+  pointer-events: none;
+}
+
+.avg-label-wrap {
+  position: relative;
+  height: 18px;
+}
+
+.avg-label {
+  position: absolute;
+  transform: translateX(-50%);
+  color: var(--ink-sub);
+  font-size: 11px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .answer-reveal {
   background: var(--accent);
   padding: 20px 18px 16px;
