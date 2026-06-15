@@ -100,8 +100,10 @@ export function TopBar({
         <div className="topbar-logo">{logo}</div>
       )}
       {title ? <h1 className="topbar-title">{title}</h1> : null}
-      <UploadTopBtn />
-      <div className="topbar-action">{right}</div>
+      <div className="topbar-action">
+        <UploadTopBtn />
+        {right}
+      </div>
     </header>
   );
 }

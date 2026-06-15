@@ -1732,13 +1732,13 @@ p {
   .topbar-action {
     margin-left: auto;
     flex: 0 0 auto;
+    gap: 4px;
   }
 
   .desktop-upload-btn {
     display: inline-flex;
     align-items: center;
     gap: 6px;
-    margin-right: 12px;
     padding: 9px 18px;
     border-radius: 12px;
     background: var(--ink);
@@ -1752,6 +1752,35 @@ p {
 
   .desktop-upload-btn:hover {
     opacity: 0.85;
+  }
+
+  /* ── 하단 탭바: 버튼 크기 모바일과 동일하게, 좌우 여백만 ── */
+  .bottom-nav {
+    justify-content: center;
+    padding: 0 48px;
+  }
+
+  .nav-item {
+    flex: 0 0 120px;
+  }
+
+  /* ── 좁은 페이지 (업로드·챌린지 플레이·결과) → 480px 고정 ── */
+  .challenge-play,
+  .result-content,
+  .share-content,
+  .upload-content {
+    max-width: 560px;
+    margin-left: auto;
+    margin-right: auto;
+    width: 100%;
+  }
+
+  /* ── 마이탭 → 홈과 동일하게 넓게 ── */
+  .profile-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 20px 48px 24px !important;
   }
 
   .floating-upload {
