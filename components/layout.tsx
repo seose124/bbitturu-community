@@ -12,6 +12,49 @@ import {
 } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 
+const navItems: Array<{
+  href: string;
+  label: string;
+  icon: LucideIcon;
+  match: (pathname: string) => boolean;
+}> = [
+  {
+    href: "/challenges",
+    label: "탐색",
+    icon: Compass,
+    match: (pathname) => pathname.startsWith("/challenges"),
+  },
+  {
+    href: "/",
+    label: "홈",
+    icon: Home,
+    match: (pathname) => pathname === "/",
+  },
+  {
+    href: "/profile",
+    label: "마이",
+    icon: UserRound,
+    match: (pathname) => pathname.startsWith("/profile"),
+  },
+];
+
+function DesktopNav() {
+  const pathname = usePathname();
+  return (
+    <nav className="desktop-nav" aria-label="주요 메뉴">
+      {navItems.map((item) => (
+        <Link
+          key={item.href}
+          href={item.href}
+          className={`desktop-nav-btn${item.match(pathname) ? " dsk-active" : ""}`}
+        >
+          {item.label}
+        </Link>
+      ))}
+    </nav>
+  );
+}
+
 export function Page({
   children,
   dark = false,
@@ -59,36 +102,11 @@ export function TopBar({
         <div className="topbar-logo">{logo}</div>
       )}
       {title ? <h1 className="topbar-title">{title}</h1> : null}
+      <DesktopNav />
       <div className="topbar-action">{right}</div>
     </header>
   );
 }
-
-const navItems: Array<{
-  href: string;
-  label: string;
-  icon: LucideIcon;
-  match: (pathname: string) => boolean;
-}> = [
-  {
-    href: "/challenges",
-    label: "탐색",
-    icon: Compass,
-    match: (pathname) => pathname.startsWith("/challenges"),
-  },
-  {
-    href: "/",
-    label: "홈",
-    icon: Home,
-    match: (pathname) => pathname === "/",
-  },
-  {
-    href: "/profile",
-    label: "마이",
-    icon: UserRound,
-    match: (pathname) => pathname.startsWith("/profile"),
-  },
-];
 
 export function BottomNav() {
   const pathname = usePathname();

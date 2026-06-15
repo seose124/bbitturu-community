@@ -1684,7 +1684,7 @@ p {
   }
 }
 
-@media (min-width: 520px) {
+@media (min-width: 520px) and (max-width: 767px) {
   body {
     display: flex;
     min-height: 100vh;
@@ -1698,6 +1698,135 @@ p {
     box-shadow:
       0 0 0 1px rgb(0 0 0 / 6%),
       0 24px 80px rgb(0 0 0 / 14%);
+  }
+}
+
+.desktop-nav {
+  display: none;
+}
+
+.desktop-nav-btn {
+  padding: 8px 20px;
+  border-radius: 10px;
+  font-family: "BMKkubulim", sans-serif;
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--ink-sub);
+  cursor: pointer;
+  transition:
+    background 150ms ease,
+    color 150ms ease;
+  border: none;
+  background: none;
+  white-space: nowrap;
+  text-decoration: none;
+}
+
+.desktop-nav-btn:hover {
+  background: rgb(0 0 0 / 6%);
+  color: var(--ink);
+}
+
+.desktop-nav-btn.dsk-active {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+}
+
+@media (min-width: 768px) {
+  body {
+    background: var(--surface);
+    display: block;
+    min-height: 100vh;
+  }
+
+  .app-frame {
+    max-width: none;
+    width: 100%;
+    height: 100vh;
+    box-shadow: none;
+  }
+
+  .bottom-nav {
+    display: none !important;
+  }
+
+  .topbar {
+    padding: 0 48px;
+    height: 64px;
+    position: relative;
+  }
+
+  .topbar-logo {
+    flex: 0 0 auto !important;
+  }
+
+  .topbar-action {
+    flex: 0 0 auto;
+  }
+
+  .desktop-nav {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
+  }
+
+  .desktop-nav > * {
+    pointer-events: auto;
+  }
+
+  .floating-upload {
+    bottom: 36px;
+    right: 48px;
+  }
+
+  .home-content {
+    max-width: 1280px;
+    margin: 0 auto;
+    width: 100%;
+    padding: 28px 48px 48px !important;
+  }
+
+  .home-content .challenge-stack {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 16px;
+  }
+
+  .filter-row {
+    padding: 12px 48px !important;
+  }
+
+  .challenge-list {
+    display: grid !important;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 14px;
+    padding: 8px 48px 48px !important;
+    max-width: 1280px;
+    margin: 0 auto;
+    align-content: start;
+  }
+
+  .explore-status-card {
+    grid-column: 1 / -1;
+  }
+
+  .toast {
+    bottom: 36px;
+  }
+}
+
+@media (min-width: 1200px) {
+  .home-content .challenge-stack {
+    grid-template-columns: repeat(3, 1fr);
+  }
+
+  .challenge-list {
+    grid-template-columns: repeat(3, 1fr);
   }
 }
 
