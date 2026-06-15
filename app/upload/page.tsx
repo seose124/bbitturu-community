@@ -53,8 +53,7 @@ export default function UploadPage() {
     event.preventDefault();
     if (!valid || submitting) return;
     if (!user) {
-      showToast("로그인이 필요해요");
-      router.push("/login");
+      showToast("잠시 후 다시 시도해주세요");
       return;
     }
     setSubmitting(true);
@@ -66,8 +65,9 @@ export default function UploadPage() {
       });
       showToast("챌린지가 공개됐어요!");
       router.push("/");
-    } catch {
-      showToast("업로드에 실패했어요. 다시 시도해주세요.");
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "";
+      showToast(msg || "업로드에 실패했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }
   };

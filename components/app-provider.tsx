@@ -69,9 +69,15 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [hydrated, setHydrated] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  // Auth state
+  // Auth state — auto sign-in anonymously if no session
   useEffect(() => {
-    supabase.auth.getUser().then(({ data }) => setUser(data.user));
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!session) {
+        supabase.auth.signInAnonymously();
+      } else {
+        setUser(session.user);
+      }
+    });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
