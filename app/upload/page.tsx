@@ -6,6 +6,8 @@ import { useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
 
+const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
@@ -42,6 +44,14 @@ export default function UploadPage() {
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
+    if (!["image/jpeg", "image/png"].includes(file.type)) {
+      showToast("JPG 또는 PNG 파일만 업로드할 수 있어요");
+      return;
+    }
+    if (file.size > MAX_FILE_SIZE) {
+      showToast("파일 크기는 최대 10MB까지 가능해요");
+      return;
+    }
     try {
       setImage(await compressImage(file));
     } catch {
@@ -58,14 +68,13 @@ export default function UploadPage() {
     }
     setSubmitting(true);
     try {
-      await addChallenge({
+      const challenge = await addChallenge({
         imageData: image!,
         answer: answer.trim(),
         hint: hint.trim() || undefined,
         author: nickname.trim() || undefined,
       });
-      showToast("챌린지가 공개됐어요!");
-      router.push("/");
+      router.push(`/upload/success/${challenge.id}`);
     } catch (err) {
       const msg = err instanceof Error ? err.message : "";
       showToast(msg || "업로드에 실패했어요. 다시 시도해주세요.");
@@ -79,8 +88,9 @@ export default function UploadPage() {
         <TopBar title="악필 업로드" backHref="/" />
         <form className="scroll-content upload-content" onSubmit={submit}>
           <div>
-            <h1 className="page-heading">악필을 공개해봐요</h1>
-            <p className="page-subtitle">판독단이 읽어드릴게요 😈</p>
+            <h1 className="page-heading">
+              판독단도 못 맞힐 악필, 지금 올려보세요 😈
+            </h1>
           </div>
 
           <div className="field">
@@ -97,11 +107,12 @@ export default function UploadPage() {
               <input
                 ref={fileRef}
                 type="file"
-                accept="image/*"
+                accept="image/jpeg,image/png"
                 onChange={handleImageChange}
                 className="upload-image-input"
               />
             </label>
+            <p className="field-hint">JPG, PNG · 최대 10MB</p>
             {image ? (
               <button
                 type="button"
@@ -117,14 +128,17 @@ export default function UploadPage() {
           </div>
 
           <div className="field">
-            <span>실제 정답</span>
+            <span>실제 글자 (정답)</span>
             <input
               className="input"
               value={answer}
               onChange={(e) => setAnswer(e.target.value)}
-              placeholder="올바른 텍스트를 입력하세요"
+              placeholder="직접 써본 글자를 입력하세요"
               maxLength={50}
             />
+            <p className="field-hint">
+              판독단이 맞혀야 할 정답. 결과 공개 때 공개됩니다.
+            </p>
           </div>
 
           <div className="field">
