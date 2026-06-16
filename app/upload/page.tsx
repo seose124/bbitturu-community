@@ -164,7 +164,7 @@ export default function UploadPage() {
               className="input"
               value={nickname}
               onChange={(e) => setNickname(e.target.value)}
-              placeholder="익명의 악필러"
+              placeholder="비워두면 '익명의 악필러'로 표기돼요"
               maxLength={20}
             />
           </div>
