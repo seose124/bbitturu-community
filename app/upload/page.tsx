@@ -34,6 +34,7 @@ export default function UploadPage() {
   const [image, setImage] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [hint, setHint] = useState("");
+  const [nickname, setNickname] = useState("");
   const [unreadable, setUnreadable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -62,6 +63,7 @@ export default function UploadPage() {
         imageData: image!,
         answer: unreadable ? "나도 못읽겠어요 🤷" : answer.trim(),
         hint: hint.trim() || undefined,
+        author: nickname.trim() || undefined,
       });
       showToast("챌린지가 공개됐어요!");
       router.push("/");
@@ -150,6 +152,19 @@ export default function UploadPage() {
               onChange={(e) => setHint(e.target.value)}
               placeholder="예: 총 5글자예요"
               maxLength={40}
+            />
+          </div>
+
+          <div className="field">
+            <span>
+              작성자명&nbsp;<em className="field-optional">(선택)</em>
+            </span>
+            <input
+              className="input"
+              value={nickname}
+              onChange={(e) => setNickname(e.target.value)}
+              placeholder="익명의 악필러"
+              maxLength={20}
             />
           </div>
 

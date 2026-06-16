@@ -30,6 +30,7 @@ type AppContextValue = {
     answer: string;
     hint?: string;
     difficulty?: Difficulty;
+    author?: string;
   }) => Promise<Challenge>;
   getChallenge: (id: number) => Challenge | undefined;
   saveAttempt: (id: number, answer: string, passed?: boolean) => void;
@@ -49,7 +50,7 @@ function dbToChallenge(row: Record<string, any>): Challenge {
     handwriting: row.handwriting ?? "",
     imageData: row.image_url ?? undefined,
     answer: row.answer,
-    author: row.author_name ?? "익명",
+    author: row.author_name ?? "익명의 악필러",
     authorId: row.author_id ?? undefined,
     difficulty: row.difficulty,
     successRate: row.success_rate ?? 0,
@@ -129,6 +130,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       answer: string;
       hint?: string;
       difficulty?: Difficulty;
+      author?: string;
     }) => {
       if (!user) throw new Error("로그인이 필요해요");
 
@@ -159,7 +161,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
           image_url: imageUrl ?? null,
           answer: input.answer,
           author_id: user.id,
-          author_name: user.email?.split("@")[0] ?? "익명",
+          author_name: input.author?.trim() || "익명의 악필러",
           difficulty: input.difficulty ?? "보통",
           hint: input.hint ?? autoHint,
           tags: ["new"],
