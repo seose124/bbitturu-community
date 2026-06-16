@@ -25,7 +25,6 @@ export default function ProfilePage() {
                 <span className="badge badge-green">
                   <Search size={11} /> 판독단
                 </span>
-                <span className="badge badge-level">삐뚤이</span>
               </div>
             </div>
           </section>
@@ -52,19 +51,6 @@ export default function ProfilePage() {
                 <span>연속 판독일</span>
               </div>
             </div>
-          </section>
-
-          <section className="card outlined level-card">
-            <div className="level-heading">
-              <strong>판독 레벨</strong>
-              <span className="badge badge-level">삐뚤이</span>
-            </div>
-            <div className="progress-track">
-              <div className="progress-fill" style={{ width: "35%" }} />
-            </div>
-            <p>
-              다음 레벨까지 <strong>65번</strong> 더 판독하세요
-            </p>
           </section>
 
           <section className="card outlined profile-menu">
