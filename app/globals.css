@@ -980,6 +980,18 @@ p {
   background: var(--success);
 }
 
+.crowd-interest {
+  display: flex;
+  justify-content: center;
+  margin: 4px 0;
+}
+
+.crowd-interest .button {
+  background: var(--primary-light);
+  color: var(--primary-dark);
+  border: none;
+}
+
 .reaction-row {
   display: flex;
   flex-wrap: wrap;
@@ -1275,12 +1287,6 @@ p {
 
 .upload-image-input {
   display: none;
-}
-
-.button-unreadable-active {
-  border-color: var(--primary) !important;
-  background: var(--primary-light) !important;
-  color: var(--primary-dark) !important;
 }
 
 .field-optional {

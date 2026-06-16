@@ -36,6 +36,7 @@ type AppContextValue = {
   saveAttempt: (id: number, answer: string, passed?: boolean) => void;
   deleteChallenge: (id: number) => Promise<void>;
   signOut: () => Promise<void>;
+  signalInterest: (challengeId: number) => Promise<void>;
   resetApp: () => void;
   showToast: (message: string) => void;
 };
@@ -149,10 +150,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      const autoHint =
-        input.answer && input.answer !== "나도 못읽겠어요 🤷"
-          ? `총 ${input.answer.replace(/\s/g, "").length}글자예요`
-          : "힌트가 없어요";
+      const autoHint = input.answer
+        ? `총 ${input.answer.replace(/\s/g, "").length}글자예요`
+        : "힌트가 없어요";
 
       const { data, error } = await supabase
         .from("challenges")
@@ -211,6 +211,16 @@ export function AppProvider({ children }: { children: ReactNode }) {
     setUser(null);
   }, []);
 
+  const signalInterest = useCallback(
+    async (challengeId: number) => {
+      await supabase.from("interest_signals").insert({
+        challenge_id: challengeId,
+        user_id: user?.id ?? null,
+      });
+    },
+    [user],
+  );
+
   const resetApp = useCallback(() => {
     window.localStorage.removeItem(ATTEMPTS_KEY);
     setAttempts({});
@@ -228,6 +238,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveAttempt,
       deleteChallenge,
       signOut,
+      signalInterest,
       resetApp,
       showToast,
     }),
@@ -241,6 +252,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       saveAttempt,
       deleteChallenge,
       signOut,
+      signalInterest,
       resetApp,
       showToast,
     ],

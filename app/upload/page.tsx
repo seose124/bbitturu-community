@@ -35,10 +35,9 @@ export default function UploadPage() {
   const [answer, setAnswer] = useState("");
   const [hint, setHint] = useState("");
   const [nickname, setNickname] = useState("");
-  const [unreadable, setUnreadable] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
-  const valid = Boolean(image && (answer.trim() || unreadable));
+  const valid = Boolean(image && answer.trim());
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -61,7 +60,7 @@ export default function UploadPage() {
     try {
       await addChallenge({
         imageData: image!,
-        answer: unreadable ? "나도 못읽겠어요 🤷" : answer.trim(),
+        answer: answer.trim(),
         hint: hint.trim() || undefined,
         author: nickname.trim() || undefined,
       });
@@ -122,24 +121,10 @@ export default function UploadPage() {
             <input
               className="input"
               value={answer}
-              onChange={(e) => {
-                setAnswer(e.target.value);
-                if (unreadable) setUnreadable(false);
-              }}
+              onChange={(e) => setAnswer(e.target.value)}
               placeholder="올바른 텍스트를 입력하세요"
-              disabled={unreadable}
               maxLength={50}
             />
-            <button
-              type="button"
-              className={`button button-ghost button-small${unreadable ? " button-unreadable-active" : ""}`}
-              onClick={() => {
-                setUnreadable(!unreadable);
-                setAnswer("");
-              }}
-            >
-              나도 못읽겠어요 🤷
-            </button>
           </div>
 
           <div className="field">

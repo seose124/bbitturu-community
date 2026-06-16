@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Check, Share2, X } from "lucide-react";
+import { Check, Share2, Users, X } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
@@ -52,11 +52,13 @@ function ColorizedAnswer({
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { challenges, attempts, getChallenge, showToast } = useBbiduru();
+  const { challenges, attempts, getChallenge, signalInterest, showToast } =
+    useBbiduru();
   const challenge = getChallenge(Number(params.id));
   const attempt = attempts[Number(params.id)];
   const [progressVisible, setProgressVisible] = useState(false);
   const [liked, setLiked] = useState<number[]>([]);
+  const [interestSent, setInterestSent] = useState(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setProgressVisible(true), 120);
@@ -167,6 +169,27 @@ export default function ResultPage() {
                   평균 {avgRate}%
                 </span>
               </div>
+
+              {!correct && attempt ? (
+                <div className="crowd-interest">
+                  <button
+                    className="button button-ghost button-small"
+                    disabled={interestSent}
+                    onClick={async () => {
+                      try {
+                        await signalInterest(challenge.id);
+                        setInterestSent(true);
+                        showToast("관심 알려주셔서 감사해요!");
+                      } catch {
+                        showToast("잠시 후 다시 시도해주세요");
+                      }
+                    }}
+                  >
+                    <Users size={15} />
+                    {interestSent ? "응답 완료!" : "집단판독의 힘을 믿고 싶어요"}
+                  </button>
+                </div>
+              ) : null}
 
               <div className="reaction-row">
                 {initialReactions.map((reaction, index) => {
