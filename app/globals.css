@@ -1948,6 +1948,9 @@ p {
   }
 
   .filter-row {
+    justify-content: center;
+    max-width: 1280px;
+    margin: 0 auto;
     padding: 12px 48px !important;
   }
 
@@ -1962,6 +1965,10 @@ p {
   }
 
   .explore-status-card {
+    grid-column: 1 / -1;
+  }
+
+  .challenge-list .empty-state {
     grid-column: 1 / -1;
   }
 
