@@ -101,7 +101,10 @@ export default function UploadPage() {
               ) : (
                 <div className="upload-image-placeholder">
                   <Camera size={30} />
-                  <span>탭하여 사진 선택</span>
+                  <div className="upload-image-label">
+                    <strong>사진 선택하기</strong>
+                    <span className="upload-image-hint">JPG, PNG · 최대 10MB</span>
+                  </div>
                 </div>
               )}
               <input
@@ -112,7 +115,6 @@ export default function UploadPage() {
                 className="upload-image-input"
               />
             </label>
-            <p className="field-hint">JPG, PNG · 최대 10MB</p>
             {image ? (
               <button
                 type="button"

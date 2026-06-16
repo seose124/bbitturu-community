@@ -1308,10 +1308,28 @@ p {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 10px;
+  gap: 14px;
   background: var(--surface);
   color: var(--ink-sub);
   font-size: 13px;
+}
+
+.upload-image-label {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.upload-image-placeholder strong {
+  color: var(--ink);
+  font-size: 15px;
+  font-weight: 700;
+}
+
+.upload-image-hint {
+  color: var(--ink-sub);
+  font-size: 12px;
 }
 
 .upload-image-preview {
