@@ -77,7 +77,7 @@ export function TopBar({
   dark = false,
 }: {
   title?: string;
-  logo?: string;
+  logo?: ReactNode;
   backHref?: string;
   right?: ReactNode;
   dark?: boolean;

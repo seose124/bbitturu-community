@@ -19,10 +19,16 @@ export default function HomePage() {
     .slice(0, 2);
 
   return (
-    <Page>
+    <Page dark>
       <div className="page-column">
         <TopBar
-          logo="삐뚜루"
+          logo={
+            <div className="home-logo">
+              <img src="/logo-symbol.png" className="home-logo-symbol" alt="" />
+              삐뚜루
+            </div>
+          }
+          dark
           right={
             <div className="topbar-buttons">
               <button

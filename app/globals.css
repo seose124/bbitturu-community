@@ -154,10 +154,25 @@ p {
 }
 
 .topbar-logo {
+  display: flex;
   min-width: 0;
   flex: 1;
+  align-items: center;
   font-size: 24px;
   font-weight: 700;
+}
+
+.home-logo {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--dark-text);
+}
+
+.home-logo-symbol {
+  width: auto;
+  height: 26px;
+  object-fit: contain;
 }
 
 .topbar-title {
@@ -2007,6 +2022,60 @@ p {
   .share-option span {
     font-size: 9px;
   }
+}
+
+/* ── 홈 탭 다크 모드 ── */
+.page-dark .home-challenge-card {
+  background: var(--dark-card);
+  box-shadow: 0 2px 12px rgb(0 0 0 / 28%);
+}
+
+.page-dark .home-writing {
+  background: rgb(255 255 255 / 4%);
+  border-bottom-color: var(--dark-border);
+}
+
+.page-dark .home-answer h3 {
+  color: var(--dark-text);
+}
+
+.page-dark .home-answer .input {
+  background: var(--dark-bg);
+  border-color: var(--dark-border);
+  color: var(--dark-text);
+}
+
+.page-dark .home-answer .input::placeholder {
+  color: var(--dark-sub);
+}
+
+.page-dark .home-answer .input:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(192 253 79 / 14%);
+}
+
+.page-dark .home-answer .button-ghost {
+  border-color: var(--dark-border);
+  background: rgb(255 255 255 / 5%);
+  color: var(--dark-sub);
+}
+
+.page-dark .section-heading a {
+  color: var(--accent);
+}
+
+.page-dark .bottom-nav {
+  background: var(--dark-card);
+  border-top-color: var(--dark-border);
+  box-shadow: 0 -2px 16px rgb(0 0 0 / 20%);
+}
+
+.page-dark .nav-item {
+  color: var(--dark-sub);
+}
+
+.page-dark .nav-item.active {
+  color: var(--accent);
 }
 
 @media (prefers-reduced-motion: reduce) {
