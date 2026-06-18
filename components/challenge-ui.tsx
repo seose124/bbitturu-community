@@ -2,8 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
-import { Flame } from "lucide-react";
-import { difficultyClass, type Challenge } from "@/lib/challenges";
+import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
 import { useBbiduru } from "@/components/app-provider";
 import { useRouter } from "next/navigation";
 
@@ -19,7 +18,14 @@ export function DifficultyBadge({
   );
 }
 
+function rateTodifficulty(successRate: number): Difficulty {
+  if (successRate >= 60) return "쉬움";
+  if (successRate >= 30) return "보통";
+  return "어려움";
+}
+
 export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
+  const difficulty = rateTodifficulty(challenge.successRate);
   const rateClass =
     challenge.successRate >= 50
       ? "rate-good"
@@ -28,33 +34,32 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
         : "rate-hard";
 
   return (
-    <Link className="challenge-list-item" href={`/challenges/${challenge.id}`}>
-      <div className="challenge-thumb">
+    <Link className="explore-card" href={`/challenges/${challenge.id}`}>
+      <div className={`explore-card-image${challenge.imageData ? " explore-card-image-photo" : ""}`}>
         {challenge.imageData ? (
-          <img src={challenge.imageData} alt="악필" className="challenge-thumb-img" />
+          <img src={challenge.imageData} alt="악필" className="explore-card-img" />
         ) : (
-          <span className="challenge-thumb-text">{challenge.handwriting}</span>
+          <span className="handwriting">{challenge.handwriting}</span>
         )}
       </div>
-      <div className="challenge-list-copy">
-        <div className="challenge-meta">
-          판독 {challenge.tries}명 · {challenge.author}
+      <div className="explore-card-info">
+        <p className="explore-card-meta">판독 {challenge.tries}명 · {challenge.author}</p>
+        <div className="explore-card-footer">
+          <div className="badge-row">
+            <span className={`badge ${difficultyClass[difficulty]}`}>{difficulty}</span>
+            {challenge.tags.includes("hot") ? (
+              <span className="badge badge-soft">
+                <img src="/icon-hot.png" className="badge-icon" alt="" /> 인기
+              </span>
+            ) : null}
+            {challenge.tags.includes("new") ? (
+              <span className="badge badge-new">
+                <img src="/icon-new.png" className="badge-icon" alt="" /> NEW
+              </span>
+            ) : null}
+          </div>
+          <span className={`explore-rate ${rateClass}`}>{challenge.successRate}%</span>
         </div>
-        <div className="badge-row">
-          <DifficultyBadge challenge={challenge} />
-          {challenge.tags.includes("hot") ? (
-            <span className="badge badge-soft">
-              <Flame size={11} fill="currentColor" /> 인기
-            </span>
-          ) : null}
-          {challenge.tags.includes("new") ? (
-            <span className="badge badge-new">NEW</span>
-          ) : null}
-        </div>
-      </div>
-      <div className="challenge-rate">
-        <strong className={rateClass}>{challenge.successRate}%</strong>
-        <span>평균 판독률</span>
       </div>
     </Link>
   );

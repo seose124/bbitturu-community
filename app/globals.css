@@ -574,6 +574,9 @@ p {
 }
 
 .filter-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
   padding: 7px 16px;
   border: 1.5px solid var(--border);
   border-radius: 999px;
@@ -1394,6 +1397,84 @@ p {
   height: 100%;
   object-fit: cover;
   border-radius: 8px;
+}
+
+.explore-card {
+  display: block;
+  overflow: hidden;
+  border-radius: 20px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  transition: transform 120ms ease;
+}
+
+.explore-card:active {
+  transform: scale(0.98);
+}
+
+.explore-card-image {
+  display: flex;
+  min-height: 160px;
+  align-items: center;
+  justify-content: center;
+  padding: 28px 24px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.explore-card-image-photo {
+  padding: 0;
+}
+
+.explore-card-img {
+  width: 100%;
+  height: auto;
+  max-height: 220px;
+  display: block;
+  object-fit: contain;
+}
+
+.explore-card-info {
+  padding: 12px 16px 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.explore-card-meta {
+  color: var(--ink-sub);
+  font-size: 11px;
+}
+
+.explore-card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.explore-rate {
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.badge-icon {
+  width: 10px;
+  height: 10px;
+  object-fit: contain;
+  vertical-align: middle;
+}
+
+.filter-chip-icon {
+  width: 14px;
+  height: 14px;
+  object-fit: contain;
+}
+
+.section-icon {
+  width: 18px;
+  height: 18px;
+  object-fit: contain;
+  vertical-align: text-bottom;
 }
 
 .home-writing-img {

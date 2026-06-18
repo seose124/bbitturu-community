@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, type ReactNode } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import {
   ChallengeListItem,
@@ -11,10 +11,26 @@ import type { ChallengeTag } from "@/lib/challenges";
 
 type Filter = "all" | ChallengeTag;
 
-const filters: Array<{ value: Filter; label: string }> = [
+const filters: Array<{ value: Filter; label: ReactNode }> = [
   { value: "all", label: "전체" },
-  { value: "hot", label: "🔥 인기" },
-  { value: "new", label: "NEW" },
+  {
+    value: "hot",
+    label: (
+      <>
+        <img src="/icon-hot.png" className="filter-chip-icon" alt="" />
+        인기
+      </>
+    ),
+  },
+  {
+    value: "new",
+    label: (
+      <>
+        <img src="/icon-new.png" className="filter-chip-icon" alt="" />
+        NEW
+      </>
+    ),
+  },
   { value: "hard", label: "💀 어려운" },
   { value: "easy", label: "😊 쉬운" },
 ];
