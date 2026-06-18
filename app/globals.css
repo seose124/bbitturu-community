@@ -389,7 +389,7 @@ p {
 }
 
 .section-heading h2 {
-  font-size: 15px;
+  font-size: 18px;
   font-weight: 700;
 }
 
@@ -1401,6 +1401,7 @@ p {
 
 .explore-card {
   display: block;
+  flex-shrink: 0;
   overflow: hidden;
   border-radius: 20px;
   background: var(--card);
@@ -1414,12 +1415,13 @@ p {
 
 .explore-card-image {
   display: flex;
-  min-height: 160px;
+  height: 180px;
   align-items: center;
   justify-content: center;
-  padding: 28px 24px;
+  padding: 24px 20px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  overflow: hidden;
 }
 
 .explore-card-image-photo {
@@ -1428,10 +1430,9 @@ p {
 
 .explore-card-img {
   width: 100%;
-  height: auto;
-  max-height: 220px;
+  height: 100%;
   display: block;
-  object-fit: contain;
+  object-fit: cover;
 }
 
 .explore-card-info {
