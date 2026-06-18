@@ -91,7 +91,7 @@ export default function ChallengePage() {
         <div className="scroll-content challenge-play">
           <article className="card outlined">
             <div className="challenge-stage">
-              <div className="paper">
+              <div className={`paper${challenge.imageData ? " paper-image" : ""}`}>
                 {challenge.imageData ? (
                   <img src={challenge.imageData} alt="악필 이미지" className="paper-img" />
                 ) : (

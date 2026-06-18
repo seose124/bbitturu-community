@@ -29,10 +29,10 @@ export default function UploadSuccessPage() {
           <div className="success-actions">
             <Link
               className="button button-primary"
-              href={challenge ? `/challenges/${challenge.id}/share` : "/challenges"}
+              href={challenge ? `/challenges/${challenge.id}` : "/challenges"}
             >
               <Share2 size={18} />
-              결과 미리 공유하기
+              내 챌린지 공유하기
             </Link>
             <Link className="button button-ghost" href="/challenges">
               다른 챌린지 구경하기

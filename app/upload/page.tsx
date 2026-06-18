@@ -1,12 +1,13 @@
 "use client";
 
-import { FormEvent, useRef, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Camera, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+const NICKNAME_KEY = "bbiduru-nickname";
 
 function compressImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
@@ -41,6 +42,11 @@ export default function UploadPage() {
   const fileRef = useRef<HTMLInputElement>(null);
   const valid = Boolean(image && answer.trim());
 
+  useEffect(() => {
+    const saved = window.localStorage.getItem(NICKNAME_KEY);
+    if (saved) setNickname(saved);
+  }, []);
+
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
@@ -74,9 +80,18 @@ export default function UploadPage() {
         hint: hint.trim() || undefined,
         author: nickname.trim() || undefined,
       });
+      if (nickname.trim()) {
+        window.localStorage.setItem(NICKNAME_KEY, nickname.trim());
+      }
       router.push(`/upload/success/${challenge.id}`);
     } catch (err) {
-      const msg = err instanceof Error ? err.message : "";
+      const msg =
+        err instanceof Error
+          ? err.message
+          : typeof err === "object" && err !== null && "message" in err
+            ? String((err as { message: unknown }).message)
+            : "";
+      console.error("[bbiduru] 업로드 실패:", err);
       showToast(msg || "업로드에 실패했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }

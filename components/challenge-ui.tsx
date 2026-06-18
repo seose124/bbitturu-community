@@ -74,7 +74,7 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
 
   return (
     <article className="home-challenge-card">
-      <div className="home-writing">
+      <div className={`home-writing${challenge.imageData ? " home-writing-image" : ""}`}>
         {challenge.imageData ? (
           <img src={challenge.imageData} alt="악필 이미지" className="home-writing-img" />
         ) : (

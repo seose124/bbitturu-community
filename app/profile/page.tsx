@@ -1,16 +1,25 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { ChevronRight, Flame, Link as LinkIcon, Search } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { BottomNav, Page, TopBar } from "@/components/layout";
 
+const NICKNAME_KEY = "bbiduru-nickname";
+
 export default function ProfilePage() {
   const { user, challenges, attempts, showToast } = useBbiduru();
+  const [savedNickname, setSavedNickname] = useState<string | null>(null);
   const uploaded = challenges.filter(
     (c) => c.authorId && user && c.authorId === user.id,
   ).length;
   const attemptCount = Object.keys(attempts).length;
   const shortId = user?.id?.slice(0, 6) ?? "------";
+
+  useEffect(() => {
+    const saved = window.localStorage.getItem(NICKNAME_KEY);
+    if (saved) setSavedNickname(saved);
+  }, []);
 
   return (
     <Page>
@@ -18,9 +27,9 @@ export default function ProfilePage() {
         <TopBar logo="마이페이지" />
         <div className="scroll-content profile-content">
           <section className="profile-header">
-            <div className="avatar">삐</div>
+            <div className="avatar">{savedNickname ? savedNickname[0] : "삐"}</div>
             <div>
-              <h1>판독가 #{shortId}</h1>
+              <h1>{savedNickname ?? `판독가 #${shortId}`}</h1>
               <div className="badge-row">
                 <span className="badge badge-green">
                   <Search size={11} /> 판독단

@@ -75,7 +75,9 @@ export function AppProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
-        supabase.auth.signInAnonymously();
+        supabase.auth.signInAnonymously().then(({ error }) => {
+          if (error) console.error("[bbiduru] 익명 로그인 실패:", error.message);
+        });
       } else {
         setUser(session.user);
       }
