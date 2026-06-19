@@ -234,14 +234,14 @@ begin
       daily_bonus_date = case when bonus > 0 then today else daily_bonus_date end,
       current_combo = case
         when p_track <> 'interpreter' then current_combo
-        when p_correct then case when combo_date = today then current_combo + 1 else 1 end
+        when p_correct then current_combo + 1
         else 0
       end,
       max_combo = greatest(
         max_combo,
         case
           when p_track = 'interpreter' and p_correct then
-            case when combo_date = today then current_combo + 1 else 1 end
+            current_combo + 1
           else 0
         end
       ),

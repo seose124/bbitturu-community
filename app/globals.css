@@ -34,8 +34,9 @@
 html,
 body {
   width: 100%;
-  min-height: 100%;
+  height: 100%;
   margin: 0;
+  overflow: hidden;
   overflow-x: hidden;
 }
 
@@ -85,7 +86,10 @@ p {
   position: relative;
   width: 100%;
   max-width: 480px;
+  height: 100%;
+  height: 100svh;
   height: 100dvh;
+  min-height: 0;
   margin: 0 auto;
   overflow: hidden;
   background: var(--surface);
@@ -94,6 +98,7 @@ p {
 .page {
   width: 100%;
   height: 100%;
+  min-height: 0;
   overflow: hidden;
   background: var(--surface);
   animation: page-in 180ms ease-out;
@@ -112,14 +117,20 @@ p {
   display: flex;
   flex-direction: column;
   height: 100%;
+  min-height: 0;
+  overflow: hidden;
 }
 
 .scroll-content {
+  position: relative;
   min-height: 0;
   flex: 1;
   overflow-x: hidden;
   overflow-y: auto;
+  overscroll-behavior-y: contain;
   scrollbar-width: none;
+  touch-action: pan-y;
+  -webkit-overflow-scrolling: touch;
 }
 
 .scroll-content::-webkit-scrollbar {
@@ -222,6 +233,8 @@ p {
 }
 
 .bottom-nav {
+  position: relative;
+  z-index: 20;
   display: flex;
   min-height: calc(64px + var(--safe-bottom));
   flex: 0 0 auto;
@@ -887,7 +900,11 @@ p {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 18px 20px 24px;
+  padding: 18px 20px calc(48px + var(--safe-bottom));
+}
+
+.result-content > * {
+  flex: 0 0 auto;
 }
 
 .answer-summary {
@@ -921,13 +938,19 @@ p {
 
 /* 결과 페이지 - 악필 이미지 미리보기 */
 .result-preview {
+  display: flex;
+  min-height: 150px;
+  align-items: center;
+  justify-content: center;
   overflow: hidden;
+  background: var(--surface);
 }
 
 .result-preview-img {
   display: block;
   width: 100%;
-  max-height: 200px;
+  height: auto;
+  max-height: 240px;
   object-fit: contain;
   background: var(--surface);
 }
@@ -939,6 +962,12 @@ p {
   min-height: 120px;
   padding: 20px;
   background: var(--surface);
+}
+
+.result-preview-error {
+  color: var(--ink-sub);
+  font-size: 12px;
+  font-weight: 700;
 }
 
 /* 글자별 색상 구분 */
@@ -1621,7 +1650,11 @@ p {
   display: flex;
   flex-direction: column;
   gap: 14px;
-  padding: 20px 20px 24px;
+  padding: 20px 20px calc(112px + var(--safe-bottom));
+}
+
+.profile-content > * {
+  flex: 0 0 auto;
 }
 
 .profile-header {
@@ -1651,6 +1684,7 @@ p {
 }
 
 .stats-card {
+  min-height: max-content;
   padding: 18px;
 }
 
@@ -1664,8 +1698,11 @@ p {
   gap: 12px;
 }
 
-.stats-grid > div {
+.stats-grid > div,
+.stats-grid > .stats-link {
   display: flex;
+  min-width: 0;
+  min-height: 82px;
   flex-direction: column;
   border-radius: 12px;
   background: var(--surface);
@@ -2470,6 +2507,8 @@ p {
 .stats-grid .stats-link {
   position: relative;
   display: flex;
+  min-width: 0;
+  min-height: 82px;
   flex-direction: column;
   border-radius: 12px;
   background: var(--surface);

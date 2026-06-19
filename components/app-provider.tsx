@@ -17,6 +17,7 @@ import { answerSimilarity } from "@/lib/similarity";
 import { type Challenge, type Difficulty } from "@/lib/challenges";
 import {
   applyContribution,
+  comboMilestoneMessage,
   defaultUserStats,
   getKstDate,
   getLevel,
@@ -485,6 +486,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setAttempts((current) => ({ ...current, [id]: attempt }));
       setStats(nextStats);
+      const comboMilestone = comboMilestoneMessage(attempt.comboAfter);
       setReportAttempts((current) => [
         ...current,
         {
@@ -558,9 +560,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (getLevel("interpreter", nextStats.interpreterXp).current.level > previousLevel) {
         maybePromptLogin("level");
       }
+      if (correct && comboMilestone) {
+        showToast(`${attempt.comboAfter}콤보 달성 · ${comboMilestone}`);
+      }
       return attempt;
     },
-    [attempts, challenges, dailyChallenge?.id, maybePromptLogin, stats, user],
+    [attempts, challenges, dailyChallenge?.id, maybePromptLogin, showToast, stats, user],
   );
 
   const deleteChallenge = useCallback(

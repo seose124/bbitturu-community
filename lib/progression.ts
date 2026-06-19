@@ -111,7 +111,7 @@ export function applyContribution(
   const earnedXp =
     options.xp + (dailyBonusEarned ? 10 : 0) + (streakBonusEarned ? 10 : 0);
 
-  let currentCombo = stats.comboDate === today ? stats.currentCombo : 0;
+  let currentCombo = stats.currentCombo;
   if (options.track === "interpreter") {
     currentCombo = options.correct ? currentCombo + 1 : 0;
   }
@@ -137,6 +137,14 @@ export function comboMessage(combo: number) {
   if (combo >= 10) return "인간 OCR 모드";
   if (combo >= 5) return "오늘 감 좋음";
   if (combo >= 3) return "눈썰미 예열 완료";
+  return null;
+}
+
+export function comboMilestoneMessage(combo: number) {
+  if (combo === 15) return "악필과 눈 맞은 자";
+  if (combo === 10) return "인간 OCR 모드";
+  if (combo === 5) return "오늘 감 좋음";
+  if (combo === 3) return "눈썰미 예열 완료";
   return null;
 }
 

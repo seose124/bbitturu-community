@@ -6,6 +6,7 @@ import { Share2, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
+import { comboMilestoneMessage } from "@/lib/progression";
 import { answerSimilarity, charMatchRate } from "@/lib/similarity";
 
 const initialReactions = [
@@ -49,6 +50,37 @@ function ColorizedAnswer({
   );
 }
 
+function ResultPreview({
+  imageData,
+  handwriting,
+}: {
+  imageData?: string;
+  handwriting: string;
+}) {
+  const [imageFailed, setImageFailed] = useState(false);
+
+  if (imageData && !imageFailed) {
+    return (
+      <img
+        src={imageData}
+        alt="악필 이미지"
+        className="result-preview-img"
+        onError={() => setImageFailed(true)}
+      />
+    );
+  }
+
+  return (
+    <div className="result-preview-text">
+      {handwriting ? (
+        <span className="handwriting">{handwriting}</span>
+      ) : (
+        <span className="result-preview-error">악필 이미지를 불러오지 못했어요</span>
+      )}
+    </div>
+  );
+}
+
 export default function ResultPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
@@ -82,8 +114,9 @@ export default function ResultPage() {
   }, [challenge, attempt]);
 
   useEffect(() => {
-    if (correct) showToast("정답! 대단해요 🎉");
-  }, [correct, showToast]);
+    const milestone = comboMilestoneMessage(attempt?.comboAfter ?? 0);
+    if (correct && !milestone) showToast("정답이에요! 대단해요");
+  }, [attempt?.comboAfter, correct, showToast]);
 
   if (!challenge) {
     return (
@@ -112,17 +145,11 @@ export default function ResultPage() {
 
           {/* 1. 악필 문제 이미지 상단 표기 */}
           <div className="card outlined result-preview">
-            {challenge.imageData ? (
-              <img
-                src={challenge.imageData}
-                alt="악필 이미지"
-                className="result-preview-img"
-              />
-            ) : (
-              <div className="result-preview-text">
-                <span className="handwriting">{challenge.handwriting}</span>
-              </div>
-            )}
+            <ResultPreview
+              key={challenge.id}
+              imageData={challenge.imageData}
+              handwriting={challenge.handwriting}
+            />
           </div>
 
           {/* 2. 나의 판독 + 3. 맞춘/틀린 색상 구분 */}
