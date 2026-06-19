@@ -1787,8 +1787,8 @@ p {
   width: min(272px, 82vw);
   height: 100%;
   flex-direction: column;
-  background: var(--card);
-  box-shadow: -12px 0 48px rgb(0 0 0 / 12%);
+  background: #1e1e1a;
+  box-shadow: -12px 0 48px rgb(0 0 0 / 50%);
   transform: translateX(100%);
   transition: transform 300ms cubic-bezier(0.4, 0, 0.2, 1);
 }
@@ -1803,12 +1803,18 @@ p {
   align-items: center;
   justify-content: space-between;
   padding: var(--safe-top) 12px 0 20px;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 1px solid var(--dark-border);
+  color: var(--dark-text);
 }
 
 .drawer-header .brand-font {
   font-size: 20px;
   font-weight: 700;
+  color: var(--accent);
+}
+
+.drawer-header .icon-button {
+  color: var(--dark-sub);
 }
 
 .drawer-nav {
@@ -1823,6 +1829,12 @@ p {
   padding: 10px 20px;
   font-size: 15px;
   font-weight: 700;
+  color: var(--dark-text);
+  transition: background 120ms ease;
+}
+
+.drawer-item:active {
+  background: rgb(255 255 255 / 5%);
 }
 
 .drawer-icon {
@@ -1832,32 +1844,33 @@ p {
   align-items: center;
   justify-content: center;
   border-radius: 11px;
+  flex-shrink: 0;
 }
 
 .drawer-tone-green {
-  background: var(--primary-light);
-  color: var(--primary-dark);
+  background: rgb(192 253 79 / 14%);
+  color: var(--accent);
 }
 
 .drawer-tone-purple {
-  background: #f0f0f8;
-  color: #6e6c9d;
+  background: rgb(160 140 230 / 14%);
+  color: #b8a8f0;
 }
 
 .drawer-tone-mint {
-  background: #f0f8f0;
-  color: var(--primary);
+  background: rgb(90 140 117 / 18%);
+  color: #7abda0;
 }
 
 .drawer-tone-orange {
-  background: #fff8f0;
-  color: #b37944;
+  background: rgb(210 150 80 / 14%);
+  color: #e8b878;
 }
 
 .drawer-divider {
   height: 1px;
   margin: 4px 20px;
-  background: var(--border);
+  background: var(--dark-border);
 }
 
 .drawer-footer {
@@ -1865,14 +1878,14 @@ p {
   flex-direction: column;
   gap: 3px;
   padding: 20px;
-  color: var(--ink-sub);
+  color: var(--dark-sub);
   font-size: 11px;
   line-height: 1.4;
 }
 
 .drawer-footer strong {
   margin-bottom: 2px;
-  color: var(--ink);
+  color: var(--dark-text);
   font-size: 13px;
 }
 
