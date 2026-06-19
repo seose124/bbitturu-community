@@ -1255,10 +1255,14 @@ p {
   text-align: center;
 }
 
-@keyframes confetti-swing {
-  0%, 100% { transform: rotate(-8deg) scale(0.93); }
-  25%, 75% { transform: rotate(0deg) scale(1.04); }
-  50%       { transform: rotate(8deg)  scale(0.93); }
+@keyframes confetti-pop {
+  0%   { transform: rotate(0deg)   scale(1);    animation-timing-function: ease-in; }
+  5%   { transform: rotate(-15deg) scale(1.2);  animation-timing-function: cubic-bezier(0.22, 1, 0.36, 1); }
+  10%  { transform: rotate(16deg)  scale(0.85); animation-timing-function: ease-out; }
+  14%  { transform: rotate(-8deg)  scale(1.08); animation-timing-function: ease-in-out; }
+  17%  { transform: rotate(3deg)   scale(0.97); animation-timing-function: ease-in-out; }
+  20%  { transform: rotate(0deg)   scale(1); }
+  100% { transform: rotate(0deg)   scale(1); }
 }
 
 .success-icon {
@@ -1270,7 +1274,7 @@ p {
 
 .success-icon img {
   transform-origin: 18% 80%;
-  animation: confetti-swing 5s ease-in-out infinite;
+  animation: confetti-pop 6s linear infinite;
 }
 
 .success-actions {
