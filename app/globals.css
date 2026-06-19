@@ -1255,9 +1255,10 @@ p {
   text-align: center;
 }
 
-@keyframes confetti-float {
-  0%, 100% { transform: translateY(0px) rotate(-6deg); }
-  50% { transform: translateY(-14px) rotate(6deg); }
+@keyframes confetti-swing {
+  0%, 100% { transform: rotate(-8deg) scale(0.93); }
+  25%, 75% { transform: rotate(0deg) scale(1.04); }
+  50%       { transform: rotate(8deg)  scale(0.93); }
 }
 
 .success-icon {
@@ -1268,7 +1269,8 @@ p {
 }
 
 .success-icon img {
-  animation: confetti-float 2.8s ease-in-out infinite;
+  transform-origin: 18% 80%;
+  animation: confetti-swing 5s ease-in-out infinite;
 }
 
 .success-actions {
