@@ -1255,16 +1255,20 @@ p {
   text-align: center;
 }
 
+@keyframes confetti-float {
+  0%, 100% { transform: translateY(0px) rotate(-6deg); }
+  50% { transform: translateY(-14px) rotate(6deg); }
+}
+
 .success-icon {
   display: flex;
-  width: 88px;
-  height: 88px;
   align-items: center;
   justify-content: center;
   margin-bottom: 8px;
-  border-radius: 50%;
-  background: var(--ink);
-  font-size: 38px;
+}
+
+.success-icon img {
+  animation: confetti-float 2.8s ease-in-out infinite;
 }
 
 .success-actions {

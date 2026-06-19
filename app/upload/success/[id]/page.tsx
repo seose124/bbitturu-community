@@ -26,7 +26,7 @@ export default function UploadSuccessPage() {
         <TopBar title="업로드 완료" backHref="/" />
         <div className="scroll-content upload-success-content">
           <div className="success-icon" aria-hidden="true">
-            <img src="/icon-confetti.svg" width={52} height={52} alt="" />
+            <img src="/icon-confetti.svg" width={96} height={96} alt="" />
           </div>
           <h1 className="page-heading brand-font">챌린지가 공개됐어요!</h1>
           <p className="page-subtitle">
