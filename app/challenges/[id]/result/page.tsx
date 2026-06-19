@@ -101,6 +101,8 @@ export default function ResultPage() {
   const currentIndex = challenges.findIndex((item) => item.id === challenge.id);
   const nextChallenge = challenges[(currentIndex + 1) % challenges.length];
   const avgRate = Math.min(100, Math.max(0, Math.round(challenge.successRate)));
+  const hasCommunityAverage = challenge.tries >= 5;
+  const displayedAvgRate = hasCommunityAverage ? avgRate : 0;
 
   return (
     <Page>
@@ -163,11 +165,24 @@ export default function ResultPage() {
                     style={{ width: progressVisible ? `${myRate}%` : "0%" }}
                   />
                 </div>
-                <div className="avg-marker" style={{ left: `${avgRate}%` }} />
+                {hasCommunityAverage ? (
+                  <div
+                    className="avg-marker"
+                    style={{ left: `${displayedAvgRate}%` }}
+                  />
+                ) : null}
               </div>
               <div className="avg-label-wrap">
-                <span className="avg-label" style={{ left: `${avgRate}%` }}>
-                  평균 {avgRate}%
+                <span
+                  className={`avg-label ${
+                    hasCommunityAverage ? "" : "avg-label-pending"
+                  }`}
+                  style={{ left: hasCommunityAverage ? `${displayedAvgRate}%` : 0 }}
+                >
+                  <span>평균 {displayedAvgRate}%</span>
+                  {!hasCommunityAverage ? (
+                    <small>평균값은 참여자 5명이 모여야 집계돼요</small>
+                  ) : null}
                 </span>
               </div>
 
