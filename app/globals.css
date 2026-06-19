@@ -526,7 +526,7 @@ p {
 }
 
 .button-primary {
-  background: var(--ink);
+  background: #2e2e28;
   color: var(--accent);
   box-shadow: 0 4px 16px rgb(28 28 24 / 18%);
 }

@@ -76,7 +76,7 @@ export default function ContactPage() {
               className="input"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="동네집사"
+              placeholder="익명의 판독러"
               maxLength={50}
             />
           </label>
