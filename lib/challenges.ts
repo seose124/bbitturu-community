@@ -13,6 +13,7 @@ export type Challenge = {
   tries: number;
   hint: string;
   tags: ChallengeTag[];
+  createdAt?: string;
 };
 
 export const initialChallenges: Challenge[] = [

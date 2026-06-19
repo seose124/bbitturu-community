@@ -44,7 +44,7 @@ export default function UploadPage() {
 
   useEffect(() => {
     const saved = window.localStorage.getItem(NICKNAME_KEY);
-    if (saved) setNickname(saved);
+    if (saved) queueMicrotask(() => setNickname(saved));
   }, []);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {

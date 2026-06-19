@@ -128,7 +128,7 @@ export function FloatingUpload() {
   const [visible, setVisible] = useState(true);
 
   useEffect(() => {
-    setVisible(true);
+    queueMicrotask(() => setVisible(true));
     const el = document.querySelector(".scroll-content") as HTMLElement | null;
     if (!el) return;
     let last = 0;

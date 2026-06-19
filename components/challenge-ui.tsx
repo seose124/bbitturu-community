@@ -2,6 +2,7 @@
 
 import { useState, type FormEvent } from "react";
 import Link from "next/link";
+import { Check, Flame, Upload } from "lucide-react";
 import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
 import { useBbiduru } from "@/components/app-provider";
 import { useRouter } from "next/navigation";
@@ -67,13 +68,15 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
 
 export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   const [answer, setAnswer] = useState("");
+  const [submitting, setSubmitting] = useState(false);
   const { saveAttempt, showToast } = useBbiduru();
   const router = useRouter();
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!answer.trim()) return;
-    saveAttempt(challenge.id, answer.trim());
+    if (!answer.trim() || submitting) return;
+    setSubmitting(true);
+    await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
   };
 
@@ -106,12 +109,118 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
           <button
             className="button button-green button-small button-grow"
             type="submit"
-            disabled={!answer.trim()}
+            disabled={!answer.trim() || submitting}
           >
-            제출하기
+            {submitting ? "제출 중..." : "제출하기"}
           </button>
         </div>
       </form>
+    </article>
+  );
+}
+
+export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
+  const [answer, setAnswer] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const { user, attempts, stats, saveAttempt } = useBbiduru();
+  const router = useRouter();
+  const attempt = attempts[challenge.id];
+  const isOwner = Boolean(user && challenge.authorId === user.id);
+
+  const submit = async (event: FormEvent) => {
+    event.preventDefault();
+    if (!answer.trim() || submitting) return;
+    setSubmitting(true);
+    await saveAttempt(challenge.id, answer.trim());
+    router.push(`/challenges/${challenge.id}/result`);
+  };
+
+  const pass = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    await saveAttempt(challenge.id, "", true);
+    router.push(`/challenges/${challenge.id}/result`);
+  };
+
+  return (
+    <article className="daily-case-card home-challenge-card">
+      <div className="daily-case-heading">
+        <span className="badge badge-level">오늘의 미제</span>
+        <span>
+          {challenge.tries}명 도전 · 성공률 {challenge.successRate}%
+        </span>
+      </div>
+      <div className={`home-writing${challenge.imageData ? " home-writing-image" : ""}`}>
+        {challenge.imageData ? (
+          <img src={challenge.imageData} alt="오늘의 미제 악필" className="home-writing-img" />
+        ) : (
+          <span className="handwriting">{challenge.handwriting}</span>
+        )}
+      </div>
+
+      {isOwner ? (
+        <div className="daily-case-state">
+          <strong>내 글씨가 오늘의 미제로 선정됐어요</strong>
+          <p>판독단의 반응이 모이는 중이에요.</p>
+          <Link className="button button-green button-small" href={`/profile/uploads/${challenge.id}`}>
+            판독 현황 보기
+          </Link>
+        </div>
+      ) : attempt ? (
+        <div className="daily-case-state">
+          <span className="daily-case-complete"><Check size={18} /> 오늘의 미제 참여 완료</span>
+          <strong>{attempt.correct ? "미제를 해결했어요" : "정답을 확인했어요"}</strong>
+          <p>판독단 +{attempt.xpEarned} XP · 현재 {stats.currentCombo}콤보</p>
+          <Link className="button button-green button-small" href={`/challenges/${challenge.id}/result`}>
+            결과 다시 보기
+          </Link>
+        </div>
+      ) : (
+        <form className="home-answer" onSubmit={submit}>
+          <h3>이 글씨, 정말 사람이 쓴 걸까요?</h3>
+          <input
+            className="input"
+            value={answer}
+            onChange={(event) => setAnswer(event.target.value)}
+            placeholder="판독 결과를 입력하세요..."
+            aria-label="오늘의 미제 판독 결과"
+          />
+          <div className="button-row">
+            <button
+              className="button button-ghost button-small"
+              type="button"
+              onClick={pass}
+              disabled={submitting}
+            >
+              모르겠어요
+            </button>
+            <button
+              className="button button-green button-small button-grow"
+              type="submit"
+              disabled={!answer.trim() || submitting}
+            >
+              {submitting ? "판독 중..." : "미제 풀기"}
+            </button>
+          </div>
+          <span className="daily-case-reward"><Flame size={13} /> 참여하면 판독단 +3 XP</span>
+        </form>
+      )}
+    </article>
+  );
+}
+
+export function DailyCaseEmpty() {
+  return (
+    <article className="daily-case-card daily-case-empty card outlined">
+      <img src="/logo-symbol.png" width={40} height={40} alt="" />
+      <div>
+        <span className="badge badge-level">오늘의 미제</span>
+        <h3>오늘의 미제를 기다리고 있어요</h3>
+        <p>첫 사건을 등록하면 판독단이 모여들어요.</p>
+      </div>
+      <Link className="button button-green button-small" href="/upload">
+        <Upload size={16} /> 악필 등록하기
+      </Link>
     </article>
   );
 }

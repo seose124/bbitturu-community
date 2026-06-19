@@ -4,13 +4,18 @@ import Link from "next/link";
 import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
-import { HomeChallengeCard } from "@/components/challenge-ui";
+import {
+  DailyCaseEmpty,
+  DailyChallengeCard,
+  HomeChallengeCard,
+} from "@/components/challenge-ui";
 import { HomeDrawer } from "@/components/home-drawer";
 import { BottomNav, Page, TopBar } from "@/components/layout";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { challenges, showToast } = useBbiduru();
+  const { challenges, dailyChallenge, dailyProgress, stats, unreadCount } =
+    useBbiduru();
   const hot = challenges
     .filter((challenge) => challenge.tags.includes("hot"))
     .slice(0, 3);
@@ -31,13 +36,10 @@ export default function HomePage() {
           dark
           right={
             <div className="topbar-buttons">
-              <button
-                className="icon-button"
-                onClick={() => showToast("알림 기능을 준비하고 있어요")}
-                aria-label="알림"
-              >
+              <Link className="icon-button notification-button" href="/notifications" aria-label="알림">
                 <img src="/icons/icon-bell.svg" width={19} height={19} alt="" />
-              </button>
+                {unreadCount ? <span className="notification-dot">{unreadCount}</span> : null}
+              </Link>
               <button
                 className="icon-button"
                 onClick={() => setDrawerOpen(true)}
@@ -49,6 +51,20 @@ export default function HomePage() {
           }
         />
         <div className="scroll-content home-content">
+          <section className="daily-case-section">
+            <div className="section-heading">
+              <h2>오늘의 미제 악필</h2>
+              <span className="daily-contribution">
+                오늘 {dailyProgress}/3 기여 · 연속 {stats.activityStreak}일
+              </span>
+            </div>
+            {dailyChallenge ? (
+              <DailyChallengeCard challenge={dailyChallenge} />
+            ) : (
+              <DailyCaseEmpty />
+            )}
+          </section>
+
           <section>
             <div className="section-heading">
               <h2><img src="/icons/icon-hot.svg" className="section-icon" alt="" /> 인기 챌린지</h2>

@@ -10,11 +10,20 @@ import { Page, TopBar } from "@/components/layout";
 export default function ChallengePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { user, challenges, getChallenge, saveAttempt, deleteChallenge, showToast } =
-    useBbiduru();
+  const {
+    user,
+    challenges,
+    dailyChallenge,
+    stats,
+    getChallenge,
+    saveAttempt,
+    deleteChallenge,
+    showToast,
+  } = useBbiduru();
   const challenge = getChallenge(Number(params.id));
   const [answer, setAnswer] = useState("");
   const [deleting, setDeleting] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
 
   if (!challenge) {
     return (
@@ -39,15 +48,18 @@ export default function ChallengePage() {
   const index = challenges.findIndex((item) => item.id === challenge.id);
   const progress = ((index + 1) / challenges.length) * 100;
 
-  const submit = (event: FormEvent) => {
+  const submit = async (event: FormEvent) => {
     event.preventDefault();
-    if (!answer.trim()) return;
-    saveAttempt(challenge.id, answer.trim());
+    if (!answer.trim() || submitting) return;
+    setSubmitting(true);
+    await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
   };
 
-  const pass = () => {
-    saveAttempt(challenge.id, "", true);
+  const pass = async () => {
+    if (submitting) return;
+    setSubmitting(true);
+    await saveAttempt(challenge.id, "", true);
     router.push(`/challenges/${challenge.id}/result`);
   };
 
@@ -91,6 +103,9 @@ export default function ChallengePage() {
         <div className="scroll-content challenge-play">
           <article className="card outlined">
             <div className="challenge-stage">
+              {dailyChallenge?.id === challenge.id ? (
+                <span className="badge badge-level challenge-daily-badge">오늘의 미제</span>
+              ) : null}
               <div className={`paper${challenge.imageData ? " paper-image" : ""}`}>
                 {challenge.imageData ? (
                   <img src={challenge.imageData} alt="악필 이미지" className="paper-img" />
@@ -122,22 +137,23 @@ export default function ChallengePage() {
                 <button
                   className="button button-ghost button-small"
                   type="button"
-                  onClick={pass}
+                  onClick={() => void pass()}
+                  disabled={submitting}
                 >
-                  모르겠어요 😅
+                  모르겠어요
                 </button>
                 <button
                   className="button button-primary button-small button-grow"
                   type="submit"
-                  disabled={!answer.trim()}
+                  disabled={!answer.trim() || submitting}
                 >
-                  제출하기
+                  {submitting ? "제출 중..." : "제출하기"}
                 </button>
               </div>
             </form>
           </article>
           <div className="streak">
-            <Flame size={14} fill="currentColor" /> 3일 연속 판독 중
+            <Flame size={14} fill="currentColor" /> {stats.currentCombo} 콤보 · 연속 활동 {stats.activityStreak}일
           </div>
         </div>
       </div>

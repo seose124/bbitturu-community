@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Check, Share2, Users, X } from "lucide-react";
+import { Share2, Users } from "lucide-react";
 import { useEffect, useMemo, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
@@ -39,7 +39,7 @@ function ColorizedAnswer({
         item.correct === null ? (
           <span key={i}> </span>
         ) : (
-          <span key={i} className={item.correct ? "char-correct" : "char-wrong"}>
+          <span key={i} className={item.correct ? "char-correct" : undefined}>
             {item.char}
           </span>
         ),
@@ -71,7 +71,7 @@ export default function ResultPage() {
         challenge &&
           attempt &&
           !attempt.passed &&
-          answerSimilarity(challenge.answer, attempt.answer) > 0.55,
+          (attempt.correct || answerSimilarity(challenge.answer, attempt.answer) > 0.55),
       ),
     [attempt, challenge],
   );
@@ -100,7 +100,7 @@ export default function ResultPage() {
 
   const currentIndex = challenges.findIndex((item) => item.id === challenge.id);
   const nextChallenge = challenges[(currentIndex + 1) % challenges.length];
-  const avgRate = challenge.successRate;
+  const avgRate = Math.min(100, Math.max(0, Math.round(challenge.successRate)));
 
   return (
     <Page>
@@ -127,7 +127,11 @@ export default function ResultPage() {
           <div className="card answer-summary outlined">
             <div>
               <span>나의 판독</span>
-              <strong>
+              <strong
+                className={
+                  attempt && !attempt.passed ? "answer-summary-input" : undefined
+                }
+              >
                 {!attempt || attempt.passed ? (
                   attempt ? "패스했어요 😅" : "아직 답하지 않았어요"
                 ) : (
@@ -138,9 +142,6 @@ export default function ResultPage() {
                 )}
               </strong>
             </div>
-            <span className={`result-icon ${correct ? "correct" : "wrong"}`}>
-              {correct ? <Check size={20} /> : <X size={20} />}
-            </span>
           </div>
 
           <article className="card outlined result-card">
@@ -215,6 +216,9 @@ export default function ResultPage() {
               <div className="divider" />
 
               {/* 6. '결과 공유하기' */}
+              {attempt && !attempt.passed ? (
+                <p className="result-xp-note">판독 참여 +5XP 획득</p>
+              ) : null}
               <Link
                 className="button button-primary"
                 href={`/challenges/${challenge.id}/share`}
@@ -225,13 +229,16 @@ export default function ResultPage() {
             </div>
           </article>
 
-          {/* 7. 다음 챌린지 도전 — 더 잘 보이는 컬러 */}
+          {/* 7. 다음 챌린지 도전 */}
           <button
-            className="button button-green"
+            className="result-next-link"
             onClick={() => router.push(`/challenges/${nextChallenge.id}`)}
           >
             다음 챌린지 도전 →
           </button>
+          <p className="result-combo-note">
+            연속 판독해서 콤보를 획득하세요!
+          </p>
         </div>
       </div>
     </Page>

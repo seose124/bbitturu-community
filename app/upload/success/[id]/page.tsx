@@ -30,9 +30,9 @@ export default function UploadSuccessPage() {
           </div>
           <h1 className="page-heading brand-font">챌린지가 공개됐어요!</h1>
           <p className="page-subtitle">
-            판독단이 도전을 시작하면 결과를 확인할 수 있어요
+            5명이 도전하면 판독 리포트를 확인할 수 있어요
             <br />
-            결과가 궁금하다면 지금 공유해서 더 많이 알려보세요
+            지금 공유하거나 마이에서 천천히 확인해보세요
           </p>
 
           <div className="success-actions">
@@ -40,8 +40,11 @@ export default function UploadSuccessPage() {
               <img src="/icons/icon-share.svg" width={18} height={18} alt="" />
               내 챌린지 공유하기
             </button>
-            <Link className="button-text" href="/challenges">
-              다른 챌린지 구경하기
+            <Link className="button button-ghost" href={`/profile/uploads/${challenge?.id ?? ""}`}>
+              판독 현황 보기
+            </Link>
+            <Link className="button-text" href="/profile/uploads">
+              마이에서 다시 확인할 수 있어요
             </Link>
           </div>
         </div>
