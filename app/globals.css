@@ -903,7 +903,7 @@ p {
   gap: 3px;
 }
 
-.answer-summary > div span {
+.answer-summary > div > span {
   color: var(--ink-sub);
   font-size: 11px;
 }
