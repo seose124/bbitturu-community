@@ -49,12 +49,12 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
             <span className={`badge ${difficultyClass[difficulty]}`}>{difficulty}</span>
             {challenge.tags.includes("hot") ? (
               <span className="badge badge-soft">
-                <img src="/icon-hot.png" className="badge-icon" alt="" /> 인기
+                <img src="/icons/icon-hot.svg" className="badge-icon" alt="" /> 인기
               </span>
             ) : null}
             {challenge.tags.includes("new") ? (
               <span className="badge badge-new">
-                <img src="/icon-new.png" className="badge-icon" alt="" /> NEW
+                <img src="/icons/icon-new.svg" className="badge-icon" alt="" /> NEW
               </span>
             ) : null}
           </div>

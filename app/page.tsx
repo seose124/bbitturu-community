@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Bell, Menu } from "lucide-react";
+import { Menu } from "lucide-react";
 import { useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { HomeChallengeCard } from "@/components/challenge-ui";
@@ -36,7 +36,7 @@ export default function HomePage() {
                 onClick={() => showToast("알림 기능을 준비하고 있어요")}
                 aria-label="알림"
               >
-                <Bell size={19} strokeWidth={2} />
+                <img src="/icons/icon-bell.svg" width={19} height={19} alt="" />
               </button>
               <button
                 className="icon-button"
@@ -51,7 +51,7 @@ export default function HomePage() {
         <div className="scroll-content home-content">
           <section>
             <div className="section-heading">
-              <h2><img src="/icon-hot.png" className="section-icon" alt="" /> 인기 챌린지</h2>
+              <h2><img src="/icons/icon-hot.svg" className="section-icon" alt="" /> 인기 챌린지</h2>
               <Link href="/challenges">전체보기 →</Link>
             </div>
             <div className="challenge-stack">
@@ -66,7 +66,7 @@ export default function HomePage() {
 
           <section>
             <div className="section-heading section-heading-spaced">
-              <h2><img src="/icon-new.png" className="section-icon" alt="" /> 새로 올라왔어요</h2>
+              <h2><img src="/icons/icon-new.svg" className="section-icon" alt="" /> 새로 올라왔어요</h2>
             </div>
             <div className="challenge-stack">
               {fresh.map((challenge) => (

@@ -17,7 +17,7 @@ const filters: Array<{ value: Filter; label: ReactNode }> = [
     value: "hot",
     label: (
       <>
-        <img src="/icon-hot.png" className="filter-chip-icon" alt="" />
+        <img src="/icons/icon-hot.svg" className="filter-chip-icon" alt="" />
         인기
       </>
     ),
@@ -26,7 +26,7 @@ const filters: Array<{ value: Filter; label: ReactNode }> = [
     value: "new",
     label: (
       <>
-        <img src="/icon-new.png" className="filter-chip-icon" alt="" />
+        <img src="/icons/icon-new.svg" className="filter-chip-icon" alt="" />
         NEW
       </>
     ),

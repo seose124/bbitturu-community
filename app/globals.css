@@ -8,14 +8,14 @@
 
 :root {
   --primary: #5a8c75;
-  --primary-light: #e3efe9;
-  --primary-dark: #3c6b57;
+  --primary-light: rgb(90 140 117 / 18%);
+  --primary-dark: #7abda0;
   --accent: #c0fd4f;
-  --surface: #f3f0e9;
-  --card: #ffffff;
+  --surface: #1c1c18;
+  --card: #262620;
   --ink: #1c1c18;
-  --ink-sub: #76766a;
-  --border: #e1ddd4;
+  --ink-sub: #8a8a78;
+  --border: #37372d;
   --success: #4caf7d;
   --danger: #d95e58;
   --dark-bg: #1c1c18;
@@ -40,12 +40,12 @@ body {
 }
 
 html {
-  background: var(--surface);
+  background: #1c1c18;
 }
 
 body {
   background: var(--surface);
-  color: var(--ink);
+  color: var(--dark-text);
   font-family:
     Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI",
     sans-serif;
@@ -249,7 +249,16 @@ p {
 }
 
 .nav-item.active {
-  color: var(--primary);
+  color: var(--accent);
+}
+
+.nav-item img {
+  opacity: 0.45;
+  transition: opacity 150ms ease;
+}
+
+.nav-item.active img {
+  opacity: 1;
 }
 
 .nav-item span {
@@ -429,7 +438,7 @@ p {
 
 .handwriting {
   display: block;
-  color: var(--ink);
+  color: var(--dark-text);
   font-size: 30px;
   line-height: 1.45;
   text-align: center;
@@ -456,7 +465,8 @@ p {
   border: 1.5px solid var(--border);
   border-radius: 12px;
   outline: none;
-  background: white;
+  background: var(--dark-card);
+  color: var(--dark-text);
   padding: 0 16px;
   font-size: 15px;
   transition:
@@ -465,12 +475,12 @@ p {
 }
 
 .input:focus {
-  border-color: var(--primary);
-  box-shadow: 0 0 0 3px var(--primary-light);
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px rgb(192 253 79 / 14%);
 }
 
 .input::placeholder {
-  color: #bdbdb0;
+  color: var(--dark-sub);
 }
 
 .textarea {
@@ -593,8 +603,8 @@ p {
 }
 
 .filter-chip.active {
-  border-color: var(--ink);
-  background: var(--ink);
+  border-color: var(--accent);
+  background: rgb(192 253 79 / 16%);
   color: var(--accent);
 }
 
@@ -641,7 +651,7 @@ p {
   text-align: center;
   white-space: pre-line;
   transform: rotate(-2deg);
-  color: var(--ink);
+  color: var(--dark-text);
 }
 
 .challenge-list-copy {
@@ -795,9 +805,9 @@ p {
   justify-content: center;
   border: 1px solid var(--border);
   border-radius: 14px;
-  background: white;
+  background: var(--card);
   padding: 22px 24px;
-  box-shadow: 0 2px 10px rgb(28 28 24 / 7%);
+  box-shadow: 0 2px 10px rgb(0 0 0 / 20%);
 }
 
 .author-line {
@@ -1340,7 +1350,7 @@ p {
 }
 
 .upload-image-placeholder strong {
-  color: var(--ink);
+  color: var(--dark-text);
   font-size: 15px;
   font-weight: 700;
 }
@@ -1694,7 +1704,7 @@ p {
 }
 
 .about-hero {
-  background: var(--ink);
+  background: var(--dark-card);
   padding: 40px 24px 32px;
   text-align: center;
 }
@@ -1930,7 +1940,7 @@ p {
 }
 
 .empty-state strong {
-  color: var(--ink);
+  color: var(--dark-text);
 }
 
 .empty-state.fill {

@@ -2,38 +2,31 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import {
-  ArrowLeft,
-  Compass,
-  Home,
-  Plus,
-  UserRound,
-  type LucideIcon,
-} from "lucide-react";
+import { ArrowLeft } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 
 const navItems: Array<{
   href: string;
   label: string;
-  icon: LucideIcon;
+  icon: string;
   match: (pathname: string) => boolean;
 }> = [
   {
     href: "/challenges",
     label: "탐색",
-    icon: Compass,
+    icon: "/icons/icon-explore.svg",
     match: (pathname) => pathname.startsWith("/challenges"),
   },
   {
     href: "/",
     label: "홈",
-    icon: Home,
+    icon: "/icons/icon-home.svg",
     match: (pathname) => pathname === "/",
   },
   {
     href: "/profile",
     label: "마이",
-    icon: UserRound,
+    icon: "/icons/icon-user.svg",
     match: (pathname) => pathname.startsWith("/profile"),
   },
 ];
@@ -47,7 +40,7 @@ function UploadTopBtn() {
   if (hidden) return null;
   return (
     <Link href="/upload" className="desktop-upload-btn">
-      <Plus size={15} strokeWidth={2.5} />
+      <img src="/icons/icon-upload.svg" width={15} height={15} alt="" />
       내 글씨 올리기
     </Link>
   );
@@ -114,7 +107,6 @@ export function BottomNav() {
   return (
     <nav className="bottom-nav" aria-label="주요 메뉴">
       {navItems.map((item) => {
-        const Icon = item.icon;
         const active = item.match(pathname);
         return (
           <Link
@@ -122,7 +114,7 @@ export function BottomNav() {
             href={item.href}
             key={item.href}
           >
-            <Icon size={24} strokeWidth={1.9} />
+            <img src={item.icon} width={24} height={24} alt="" />
             <span>{item.label}</span>
           </Link>
         );
@@ -162,7 +154,7 @@ export function FloatingUpload() {
       href="/upload"
       aria-label="악필 업로드"
     >
-      <Plus size={22} strokeWidth={2.5} />
+      <img src="/icons/icon-upload.svg" width={20} height={20} alt="" />
       <span>업로드</span>
     </Link>
   );
