@@ -516,13 +516,38 @@ p {
     transform 120ms ease;
 }
 
+.button:hover {
+  opacity: 0.88;
+}
+
 .button:active {
+  opacity: 1;
   transform: scale(0.97);
 }
 
 .button:disabled {
   cursor: default;
   opacity: 0.35;
+}
+
+.button-text {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 14px;
+  color: var(--ink-sub);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: opacity 150ms ease;
+  background: none;
+  border: none;
+  text-decoration: none;
+  width: 100%;
+}
+
+.button-text:hover {
+  opacity: 0.55;
 }
 
 .button-primary {
