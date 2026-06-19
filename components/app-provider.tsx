@@ -509,22 +509,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
       }
 
       if (user) {
-        const { data } = await supabase.rpc("submit_attempt", {
+        const { data, error } = await supabase.rpc("submit_attempt", {
           p_challenge_id: id,
           p_answer: cleanAnswer,
           p_is_pass: passed,
           p_is_daily: isDaily,
         });
-        if (data?.stats) setStats(dbToStats(data.stats));
-        if (data?.challenge_stats) {
+        let savedData = data;
+        if (error) {
+          const {
+            data: { session },
+          } = await supabase.auth.getSession();
+          if (session) {
+            const response = await fetch("/api/attempts", {
+              method: "POST",
+              headers: {
+                Authorization: `Bearer ${session.access_token}`,
+                "Content-Type": "application/json",
+              },
+              body: JSON.stringify({
+                challengeId: id,
+                answer: cleanAnswer,
+                passed,
+                isDaily,
+              }),
+            });
+            if (response.ok) savedData = await response.json();
+          }
+        }
+        if (savedData?.stats) setStats(dbToStats(savedData.stats));
+        if (savedData?.challenge_stats) {
           setChallenges((current) =>
             current.map((item) =>
               item.id === id
                 ? {
                     ...item,
-                    tries: Number(data.challenge_stats.tries ?? item.tries),
+                    tries: Number(savedData.challenge_stats.tries ?? item.tries),
                     successRate: Number(
-                      data.challenge_stats.success_rate ?? item.successRate,
+                      savedData.challenge_stats.success_rate ?? item.successRate,
                     ),
                   }
                 : item,
