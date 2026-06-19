@@ -1939,20 +1939,10 @@ p {
   }
 }
 
-@media (min-width: 520px) and (max-width: 767px) {
-  body {
-    display: flex;
-    min-height: 100vh;
-    align-items: flex-start;
-    justify-content: center;
-    background: #d8d5cc;
-  }
-
+@media (min-width: 480px) {
   .app-frame {
-    height: 100vh;
-    box-shadow:
-      0 0 0 1px rgb(0 0 0 / 6%),
-      0 24px 80px rgb(0 0 0 / 14%);
+    max-width: none;
+    width: 100%;
   }
 }
 
