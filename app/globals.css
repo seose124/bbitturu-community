@@ -7,9 +7,9 @@
 }
 
 :root {
-  --primary: #5a8c75;
-  --primary-light: rgb(90 140 117 / 18%);
-  --primary-dark: #7abda0;
+  --primary: #D8F789;
+  --primary-light: rgb(216 247 137 / 18%);
+  --primary-dark: #b8e048;
   --accent: #c0fd4f;
   --surface: #1c1c18;
   --card: #262620;
@@ -533,7 +533,7 @@ p {
 
 .button-green {
   background: var(--primary);
-  color: white;
+  color: var(--ink);
 }
 
 .button-secondary {
@@ -697,12 +697,12 @@ p {
 
 .difficulty-normal {
   background: var(--primary);
-  color: white;
+  color: var(--ink);
 }
 
 .difficulty-hard {
   background: var(--primary-dark);
-  color: white;
+  color: var(--ink);
 }
 
 .difficulty-extreme {
@@ -718,7 +718,7 @@ p {
 .badge-new,
 .badge-green {
   background: var(--primary);
-  color: white;
+  color: var(--ink);
 }
 
 .badge-level {
@@ -1146,7 +1146,7 @@ p {
 }
 
 .share-cta {
-  color: #73ae91;
+  color: #D8F789;
   font-size: 12px;
   font-weight: 700;
 }
@@ -1868,8 +1868,8 @@ p {
 }
 
 .drawer-tone-mint {
-  background: rgb(90 140 117 / 18%);
-  color: #7abda0;
+  background: rgb(216 247 137 / 18%);
+  color: #D8F789;
 }
 
 .drawer-tone-orange {

@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Plus } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
 
 const navItems: Array<{
@@ -40,7 +40,7 @@ function UploadTopBtn() {
   if (hidden) return null;
   return (
     <Link href="/upload" className="desktop-upload-btn">
-      <img src="/icons/icon-upload.svg" width={15} height={15} alt="" />
+      <Plus size={15} strokeWidth={2.5} />
       내 글씨 올리기
     </Link>
   );
@@ -154,7 +154,7 @@ export function FloatingUpload() {
       href="/upload"
       aria-label="악필 업로드"
     >
-      <img src="/icons/icon-upload.svg" width={20} height={20} alt="" />
+      <Plus size={22} strokeWidth={2.5} />
       <span>업로드</span>
     </Link>
   );

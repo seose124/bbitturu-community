@@ -31,8 +31,24 @@ const filters: Array<{ value: Filter; label: ReactNode }> = [
       </>
     ),
   },
-  { value: "hard", label: "💀 어려운" },
-  { value: "easy", label: "😊 쉬운" },
+  {
+    value: "hard",
+    label: (
+      <>
+        <img src="/icons/icon-hard.svg" className="filter-chip-icon" alt="" />
+        어려운
+      </>
+    ),
+  },
+  {
+    value: "easy",
+    label: (
+      <>
+        <img src="/icons/icon-easy.svg" className="filter-chip-icon" alt="" />
+        쉬운
+      </>
+    ),
+  },
 ];
 
 export default function ChallengesPage() {
