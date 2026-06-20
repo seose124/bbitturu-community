@@ -4,6 +4,7 @@ import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { ArrowLeft, Plus } from "lucide-react";
 import { type ReactNode, useEffect, useState } from "react";
+import { OnboardingCard } from "@/components/onboarding";
 
 const navItems: Array<{
   href: string;
@@ -26,7 +27,7 @@ const navItems: Array<{
   {
     href: "/profile",
     label: "마이",
-    icon: "/icons/icon-face.svg",
+    icon: "/icons/icon-user.svg",
     match: (pathname) => pathname.startsWith("/profile"),
   },
 ];
@@ -190,6 +191,7 @@ export function AppChrome({ children }: { children: ReactNode }) {
       {children}
       <BottomNav />
       <FloatingUpload />
+      <OnboardingCard />
     </div>
   );
 }
