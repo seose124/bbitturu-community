@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
+import { resetClientForPublicLaunch } from "@/lib/client-reset";
 
 const ONBOARDING_KEY = "bbiduru-onboarded";
 
@@ -11,6 +12,7 @@ export function OnboardingCard() {
   const router = useRouter();
 
   useEffect(() => {
+    resetClientForPublicLaunch();
     if (!localStorage.getItem(ONBOARDING_KEY)) {
       queueMicrotask(() => setVisible(true));
     }

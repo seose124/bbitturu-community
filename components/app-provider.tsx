@@ -29,6 +29,7 @@ import {
   type ChallengeReport,
   type ReportAttempt,
 } from "@/lib/reports";
+import { resetClientForPublicLaunch } from "@/lib/client-reset";
 
 export type Attempt = {
   answer: string;
@@ -227,37 +228,59 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [loginPrompt, setLoginPrompt] = useState<LoginPromptReason>(null);
   const [toast, setToast] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [clientInitialized, setClientInitialized] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isAnonymous = Boolean(user?.is_anonymous);
 
   useEffect(() => {
+    resetClientForPublicLaunch();
+    queueMicrotask(() => setClientInitialized(true));
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    const didReset = resetClientForPublicLaunch();
     initAnalytics(undefined);
-    supabase.auth.getSession().then(({ data: { session } }) => {
+
+    async function initializeUser() {
+      if (didReset) {
+        await supabase.auth.signOut({ scope: "local" });
+      }
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      if (cancelled) return;
       if (!session) {
-        supabase.auth.signInAnonymously().then(({ data, error }) => {
-          if (error) {
-            console.error("[bbiduru] 익명 로그인 실패:", error.message);
-            return;
-          }
-          if (data.user) identifyUser(data.user.id);
-          setUser(data.user);
-        });
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (cancelled) return;
+        if (error) {
+          console.error("[bbiduru] 익명 로그인 실패:", error.message);
+          return;
+        }
+        if (data.user) identifyUser(data.user.id);
+        setUser(data.user);
       } else {
         identifyUser(session.user.id);
         setUser(session.user);
       }
-    });
+    }
+
+    void initializeUser();
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
       if (session?.user) identifyUser(session.user.id);
       setUser(session?.user ?? null);
     });
-    return () => subscription.unsubscribe();
+    return () => {
+      cancelled = true;
+      subscription.unsubscribe();
+    };
   }, []);
 
   useEffect(() => {
+    resetClientForPublicLaunch();
     try {
       const savedAttempts = window.localStorage.getItem(ATTEMPTS_KEY);
       const savedStats = window.localStorage.getItem(STATS_KEY);
@@ -747,6 +770,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
       showToast,
     ],
   );
+
+  if (!clientInitialized) return null;
 
   return (
     <AppContext.Provider value={value}>
