@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type FormEvent } from "react";
+import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
 import { Check, Flame, Upload } from "lucide-react";
@@ -225,6 +225,66 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
         </form>
       )}
     </article>
+  );
+}
+
+export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) {
+  const [activeIndex, setActiveIndex] = useState(0);
+  const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetTimer = () => {
+    if (timerRef.current) clearInterval(timerRef.current);
+    if (challenges.length <= 1) return;
+    timerRef.current = setInterval(() => {
+      setActiveIndex((i) => (i + 1) % challenges.length);
+    }, 3000);
+  };
+
+  useEffect(() => {
+    resetTimer();
+    return () => { if (timerRef.current) clearInterval(timerRef.current); };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [challenges.length]);
+
+  const goTo = (idx: number) => {
+    setActiveIndex(idx);
+    resetTimer();
+  };
+
+  return (
+    <div className="daily-carousel-root">
+      {/* mobile: single-card carousel */}
+      <div className="daily-carousel-mobile">
+        <div
+          className="daily-carousel-track"
+          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+        >
+          {challenges.map((c) => (
+            <div className="daily-carousel-slide" key={c.id}>
+              <DailyChallengeCard challenge={c} />
+            </div>
+          ))}
+        </div>
+        {challenges.length > 1 && (
+          <div className="daily-carousel-dots">
+            {challenges.map((_, i) => (
+              <button
+                key={i}
+                className={`daily-dot${i === activeIndex ? " active" : ""}`}
+                onClick={() => goTo(i)}
+                aria-label={`${i + 1}번째 미제`}
+              />
+            ))}
+          </div>
+        )}
+      </div>
+      {/* desktop: 3-column grid */}
+      <div className="daily-cases-grid">
+        {challenges.map((c) => (
+          <DailyChallengeCard challenge={c} key={c.id} />
+        ))}
+      </div>
+    </div>
   );
 }
 

@@ -7,6 +7,7 @@ import { useBbiduru } from "@/components/app-provider";
 import {
   DailyCaseEmpty,
   DailyChallengeCard,
+  DailyCasesCarousel,
   HomeChallengeCard,
 } from "@/components/challenge-ui";
 import { HomeDrawer } from "@/components/home-drawer";
@@ -14,7 +15,7 @@ import { Page, TopBar } from "@/components/layout";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { challenges, dailyChallenge, dailyProgress, stats, unreadCount } =
+  const { challenges, dailyChallenges, dailyProgress, stats, unreadCount } =
     useBbiduru();
   const hot = challenges
     .filter((challenge) => challenge.tags.includes("hot"))
@@ -58,8 +59,8 @@ export default function HomePage() {
                 오늘 {dailyProgress}/3 기여 · 연속 {stats.activityStreak}일
               </span>
             </div>
-            {dailyChallenge ? (
-              <DailyChallengeCard challenge={dailyChallenge} />
+            {dailyChallenges.length > 0 ? (
+              <DailyCasesCarousel challenges={dailyChallenges} />
             ) : (
               <DailyCaseEmpty />
             )}

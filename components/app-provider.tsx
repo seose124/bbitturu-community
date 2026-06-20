@@ -61,6 +61,7 @@ type AppContextValue = {
   attempts: Record<number, Attempt>;
   stats: UserStats;
   dailyChallenge?: Challenge;
+  dailyChallenges: Challenge[];
   dailyProgress: number;
   notifications: AppNotification[];
   unreadCount: number;
@@ -371,6 +372,13 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return candidates[Math.abs(dayNumber) % candidates.length];
   }, [challenges, dailyChallengeId]);
 
+  const dailyChallenges = useMemo(() => {
+    if (!challenges.length) return [];
+    const withTries = challenges.filter((c) => c.tries >= 3);
+    const pool = withTries.length >= 3 ? withTries : challenges;
+    return [...pool].sort((a, b) => a.successRate - b.successRate).slice(0, 3);
+  }, [challenges]);
+
   const dailyProgress =
     stats.dailyActivityDate === getKstDate()
       ? Math.min(3, stats.dailyValidActivityCount)
@@ -493,7 +501,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       const existing = attempts[id];
       const challenge = challenges.find((item) => item.id === id);
       if (!challenge) throw new Error("챌린지를 찾을 수 없어요");
-      const isDaily = dailyChallenge?.id === id;
+      const isDaily = dailyChallenges.some((c) => c.id === id);
       if (existing && (!isDaily || isTodayDailyAttempt(existing))) {
         return existing;
       }
@@ -692,6 +700,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       attempts,
       stats,
       dailyChallenge,
+      dailyChallenges,
       dailyProgress,
       notifications,
       unreadCount,
@@ -718,6 +727,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       attempts,
       stats,
       dailyChallenge,
+      dailyChallenges,
       dailyProgress,
       notifications,
       unreadCount,
