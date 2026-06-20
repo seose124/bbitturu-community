@@ -26,7 +26,7 @@ const navItems: Array<{
   {
     href: "/profile",
     label: "마이",
-    icon: "/icons/icon-user.svg",
+    icon: "/icons/icon-face.svg",
     match: (pathname) => pathname.startsWith("/profile"),
   },
 ];

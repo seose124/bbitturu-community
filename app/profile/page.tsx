@@ -7,8 +7,6 @@ import {
   ChevronRight,
   Flame,
   Link as LinkIcon,
-  Search,
-  Upload,
 } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
@@ -120,12 +118,14 @@ export default function ProfilePage() {
         <TopBar logo="마이페이지" />
         <div className="scroll-content profile-content">
           <section className="profile-header">
-            <div className="avatar">{savedNickname ? savedNickname[0] : "삐"}</div>
+            <div className="avatar">
+              <img src="/icons/icon-face.svg" width={36} height={36} alt="" />
+            </div>
             <div>
               <h1>{savedNickname ?? `판독가 #${shortId}`}</h1>
               <div className="badge-row">
                 <span className="badge badge-green">
-                  {representative === "interpreter" ? <Search size={11} /> : <Upload size={11} />}
+                  <img src="/icons/icon-pencil.svg" width={11} height={11} alt="" />
                   Lv.{representativeLevel.level} {representativeLevel.title}
                 </span>
               </div>
@@ -176,7 +176,7 @@ export default function ProfilePage() {
 
           <section className="card outlined profile-menu">
             <Link href="/profile/uploads">
-              <Upload size={18} />
+              <img src="/icons/icon-upload.svg" width={18} height={18} alt="" />
               <span>업로드 챌린지</span>
               {unreadReportCount ? <b>{unreadReportCount}</b> : null}
               <ChevronRight size={16} />

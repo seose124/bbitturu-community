@@ -275,6 +275,7 @@ p {
 }
 
 .nav-item img {
+  display: block;
   opacity: 0.45;
   transition: opacity 150ms ease;
 }
@@ -286,6 +287,7 @@ p {
 .nav-item span {
   font-size: 10px;
   font-weight: 700;
+  text-align: center;
 }
 
 .floating-upload {
@@ -304,7 +306,7 @@ p {
   padding: 0 20px 0 14px;
   font-size: 14px;
   font-weight: 700;
-  box-shadow: 0 8px 28px rgb(28 28 24 / 36%);
+  box-shadow: 0 8px 28px rgb(28 28 24 / 36%), 0 0 18px 3px rgb(216 247 137 / 22%);
   transition:
     opacity 280ms cubic-bezier(0.4, 0, 0.2, 1),
     box-shadow 150ms ease;
@@ -1549,6 +1551,7 @@ p {
 .explore-card {
   display: block;
   flex-shrink: 0;
+  min-width: 0;
   overflow: hidden;
   border-radius: 22px;
   background: var(--card);
@@ -1562,10 +1565,10 @@ p {
 
 .explore-card-image {
   display: flex;
-  height: 190px;
+  height: 160px;
   align-items: center;
   justify-content: center;
-  padding: 24px 20px;
+  padding: 20px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
   overflow: hidden;
@@ -1583,10 +1586,11 @@ p {
 }
 
 .explore-card-info {
-  padding: 14px 16px 16px;
+  padding: 12px 14px 14px;
   display: flex;
   flex-direction: column;
-  gap: 14px;
+  gap: 10px;
+  min-width: 0;
 }
 
 .explore-card-meta {
@@ -1718,9 +1722,6 @@ p {
   justify-content: center;
   border-radius: 18px;
   background: var(--ink);
-  color: var(--accent);
-  font-family: "BMKkubulim", sans-serif;
-  font-size: 22px;
 }
 
 .profile-header h1 {
