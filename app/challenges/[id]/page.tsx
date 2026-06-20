@@ -29,8 +29,12 @@ export default function ChallengePage() {
   const [answer, setAnswer] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
-  const mountTimeRef = useRef(Date.now());
+  const mountTimeRef = useRef<number | null>(null);
   const clickTrackedRef = useRef(false);
+
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
 
   useEffect(() => {
     if (clickTrackedRef.current || !challenge) return;
@@ -71,7 +75,9 @@ export default function ChallengePage() {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
-    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    const timeSpent = mountTimeRef.current
+      ? Math.round((Date.now() - mountTimeRef.current) / 1000)
+      : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
@@ -80,7 +86,9 @@ export default function ChallengePage() {
   const pass = async () => {
     if (submitting) return;
     setSubmitting(true);
-    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    const timeSpent = mountTimeRef.current
+      ? Math.round((Date.now() - mountTimeRef.current) / 1000)
+      : 0;
     trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
     await saveAttempt(challenge.id, "", true);
     router.push(`/challenges/${challenge.id}/result`);

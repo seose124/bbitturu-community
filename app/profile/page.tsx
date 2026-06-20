@@ -7,6 +7,8 @@ import {
   ChevronRight,
   Flame,
   Link as LinkIcon,
+  Mail,
+  MailCheck,
 } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
@@ -94,6 +96,7 @@ export default function ProfilePage() {
   const representativeXp =
     representative === "interpreter" ? stats.interpreterXp : stats.uploaderXp;
   const representativeLevel = getLevel(representative, representativeXp).current;
+  const savedEmail = user && !user.is_anonymous ? user.email : null;
 
   useEffect(() => {
     const saved = window.localStorage.getItem(NICKNAME_KEY);
@@ -194,6 +197,29 @@ export default function ProfilePage() {
               <span>친구 초대하기</span>
               <ChevronRight size={16} />
             </button>
+          </section>
+
+          <section className="profile-save-account" aria-label="기록 저장 상태">
+            {savedEmail ? (
+              <div className="card outlined profile-saved-email">
+                <MailCheck size={20} aria-hidden="true" />
+                <div>
+                  <strong>이메일로 기록 저장 중</strong>
+                  <span>{savedEmail}</span>
+                </div>
+              </div>
+            ) : (
+              <>
+                <p>현재 기록은 이 브라우저에 저장되고 있어요.</p>
+                <Link
+                  className="button button-primary"
+                  href="/login?reason=save&next=%2Fprofile"
+                >
+                  <Mail size={18} aria-hidden="true" />
+                  이메일로 기록 저장하기
+                </Link>
+              </>
+            )}
           </section>
         </div>
       </div>

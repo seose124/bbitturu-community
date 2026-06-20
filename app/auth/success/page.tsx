@@ -1,9 +1,19 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useState } from "react";
 import { Page, TopBar } from "@/components/layout";
 
 export default function AuthSuccessPage() {
+  const [next, setNext] = useState("/profile");
+
+  useEffect(() => {
+    const requestedNext = new URLSearchParams(window.location.search).get("next");
+    if (requestedNext?.startsWith("/") && !requestedNext.startsWith("//")) {
+      queueMicrotask(() => setNext(requestedNext));
+    }
+  }, []);
+
   return (
     <Page className="white-page">
       <div className="page-column">
@@ -19,8 +29,8 @@ export default function AuthSuccessPage() {
             이제 어디서든 기록을 이어갈 수 있어요.
           </p>
           <div className="success-actions">
-            <Link className="button button-primary" href="/challenges">
-              탐색하러 가기
+            <Link className="button button-primary" href={next}>
+              계속하기
             </Link>
             <Link className="button button-ghost" href="/profile">
               마이페이지 보기

@@ -159,7 +159,7 @@ const DAILY_PROMPTS = [
 export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challenge; index?: number }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { attempts, stats, saveAttempt } = useBbiduru();
+  const { attempts, stats, saveAttempt, showToast } = useBbiduru();
   const router = useRouter();
   const mountTimeRef = useRef<number | null>(null);
   const storedAttempt = attempts[challenge.id];
@@ -173,7 +173,7 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
     mountTimeRef.current = Date.now();
   }, []);
 
-  const submit = async (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
@@ -181,18 +181,22 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
       ? Math.round((Date.now() - mountTimeRef.current) / 1000)
       : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
-    await saveAttempt(challenge.id, answer.trim());
+    void saveAttempt(challenge.id, answer.trim()).catch(() => {
+      showToast("기록 저장에 실패했어요. 다시 시도해주세요");
+    });
     router.push(`/challenges/${challenge.id}/result`);
   };
 
-  const pass = async () => {
+  const pass = () => {
     if (submitting) return;
     setSubmitting(true);
     const timeSpent = mountTimeRef.current
       ? Math.round((Date.now() - mountTimeRef.current) / 1000)
       : 0;
     trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
-    await saveAttempt(challenge.id, "", true);
+    void saveAttempt(challenge.id, "", true).catch(() => {
+      showToast("기록 저장에 실패했어요. 다시 시도해주세요");
+    });
     router.push(`/challenges/${challenge.id}/result`);
   };
 

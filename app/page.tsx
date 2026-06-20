@@ -6,7 +6,6 @@ import { useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import {
   DailyCaseEmpty,
-  DailyChallengeCard,
   DailyCasesCarousel,
   HomeChallengeCard,
 } from "@/components/challenge-ui";
