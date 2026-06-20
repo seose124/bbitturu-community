@@ -29,6 +29,7 @@ function rateTodifficulty(successRate: number): Difficulty {
 
 export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
   const difficulty = rateTodifficulty(challenge.successRate);
+  const isRatePending = challenge.tries < 5;
   const rateClass =
     challenge.successRate >= 50
       ? "rate-good"
@@ -53,7 +54,9 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
           </p>
           <div className="explore-rate-block">
             <span>평균 판독률</span>
-            <strong className={rateClass}>{challenge.successRate}%</strong>
+            <strong className={isRatePending ? "rate-pending" : rateClass}>
+              {isRatePending ? "집계중..." : `${challenge.successRate}%`}
+            </strong>
           </div>
         </div>
         <div className="explore-card-tags">

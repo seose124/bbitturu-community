@@ -1848,6 +1848,14 @@ p {
   line-height: 1;
 }
 
+.explore-rate-block > strong.rate-pending {
+  color: var(--dark-sub);
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
 .explore-card-tags {
   grid-area: tags;
   display: flex;
