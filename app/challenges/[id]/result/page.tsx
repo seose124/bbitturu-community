@@ -221,6 +221,28 @@ export default function ResultPage() {
                 </span>
               </div>
 
+              <div className="reaction-row">
+                {initialReactions.map((reaction, index) => {
+                  const active = liked.includes(index);
+                  return (
+                    <button
+                      className={`reaction-chip ${active ? "liked" : ""}`}
+                      key={reaction.icon}
+                      onClick={() =>
+                        setLiked((current) =>
+                          active
+                            ? current.filter((item) => item !== index)
+                            : [...current, index],
+                        )
+                      }
+                    >
+                      {reaction.icon}
+                      <span>{reaction.count + (active ? 1 : 0)}</span>
+                    </button>
+                  );
+                })}
+              </div>
+
               {!correct && attempt ? (
                 <div className="crowd-interest">
                   <button
@@ -243,27 +265,6 @@ export default function ResultPage() {
                 </div>
               ) : null}
 
-              <div className="reaction-row">
-                {initialReactions.map((reaction, index) => {
-                  const active = liked.includes(index);
-                  return (
-                    <button
-                      className={`reaction-chip ${active ? "liked" : ""}`}
-                      key={reaction.icon}
-                      onClick={() =>
-                        setLiked((current) =>
-                          active
-                            ? current.filter((item) => item !== index)
-                            : [...current, index],
-                        )
-                      }
-                    >
-                      {reaction.icon}
-                      <span>{reaction.count + (active ? 1 : 0)}</span>
-                    </button>
-                  );
-                })}
-              </div>
               <div className="divider" />
 
               {/* 6. '결과 공유하기' */}

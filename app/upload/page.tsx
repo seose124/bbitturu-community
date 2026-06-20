@@ -10,31 +10,20 @@ import {
   trackUploadFailed,
 } from "@/lib/analytics";
 import { Camera, Rocket } from "lucide-react";
+import NextImage from "next/image";
 import { useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
+import { ImageEditor } from "@/components/image-editor";
 import { Page, TopBar } from "@/components/layout";
 
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const NICKNAME_KEY = "bbiduru-nickname";
 
-function compressImage(file: File): Promise<string> {
+function readImage(file: File): Promise<string> {
   return new Promise((resolve, reject) => {
     const reader = new FileReader();
     reader.onerror = () => reject(new Error("파일을 읽을 수 없어요"));
-    reader.onload = (e) => {
-      const img = new Image();
-      img.onerror = () => reject(new Error("이미지를 처리할 수 없어요"));
-      img.onload = () => {
-        const canvas = document.createElement("canvas");
-        const MAX = 800;
-        const scale = Math.min(MAX / img.width, MAX / img.height, 1);
-        canvas.width = Math.round(img.width * scale);
-        canvas.height = Math.round(img.height * scale);
-        canvas.getContext("2d")!.drawImage(img, 0, 0, canvas.width, canvas.height);
-        resolve(canvas.toDataURL("image/jpeg", 0.7));
-      };
-      img.src = e.target?.result as string;
-    };
+    reader.onload = () => resolve(reader.result as string);
     reader.readAsDataURL(file);
   });
 }
@@ -43,6 +32,7 @@ export default function UploadPage() {
   const router = useRouter();
   const { user, addChallenge, showToast } = useBbiduru();
   const [image, setImage] = useState<string | null>(null);
+  const [editorSource, setEditorSource] = useState<string | null>(null);
   const [answer, setAnswer] = useState("");
   const [hint, setHint] = useState("");
   const [nickname, setNickname] = useState("");
@@ -70,7 +60,7 @@ export default function UploadPage() {
       return;
     }
     try {
-      setImage(await compressImage(file));
+      setEditorSource(await readImage(file));
       trackPhotoAttached(Math.round(file.size / 1024));
     } catch {
       showToast("이미지를 처리할 수 없어요");
@@ -119,7 +109,16 @@ export default function UploadPage() {
         <form className="scroll-content upload-content" onSubmit={submit}>
           <div>
             <h1 className="page-heading">
-              판독단도 못 맞힐 악필, 지금 올려보세요 😈
+              판독단도 못 맞힐 악필,
+              <br />
+              지금 올려보세요
+              <NextImage
+                src="/icons/hard.svg"
+                width={24}
+                height={24}
+                className="upload-heading-icon"
+                alt=""
+              />
             </h1>
           </div>
 
@@ -146,16 +145,26 @@ export default function UploadPage() {
               />
             </label>
             {image ? (
-              <button
-                type="button"
-                className="button button-ghost button-small"
-                onClick={() => {
-                  setImage(null);
-                  if (fileRef.current) fileRef.current.value = "";
-                }}
-              >
-                다시 선택
-              </button>
+              <div className="upload-image-actions">
+                <button
+                  type="button"
+                  className="button button-secondary button-small"
+                  onClick={() => setEditorSource(image)}
+                >
+                  사진 편집
+                </button>
+                <button
+                  type="button"
+                  className="button button-ghost button-small"
+                  onClick={() => {
+                    if (!fileRef.current) return;
+                    fileRef.current.value = "";
+                    fileRef.current.click();
+                  }}
+                >
+                  다시 선택
+                </button>
+              </div>
             ) : null}
           </div>
 
@@ -222,6 +231,19 @@ export default function UploadPage() {
           </button>
         </form>
       </div>
+      {editorSource ? (
+        <ImageEditor
+          source={editorSource}
+          onCancel={() => {
+            setEditorSource(null);
+            if (fileRef.current) fileRef.current.value = "";
+          }}
+          onComplete={(editedImage) => {
+            setImage(editedImage);
+            setEditorSource(null);
+          }}
+        />
+      ) : null}
     </Page>
   );
 }
