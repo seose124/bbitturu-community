@@ -3456,6 +3456,19 @@ p {
 
 /* desktop: hide carousel, show grid */
 @media (min-width: 768px) {
+  .attempts-content {
+    width: 100%;
+    max-width: 1280px;
+    margin: 0 auto;
+    padding: 20px 48px 48px;
+  }
+
+  .attempt-list {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+
   .daily-carousel-mobile {
     display: none;
   }

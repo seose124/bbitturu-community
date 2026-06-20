@@ -4,6 +4,7 @@ import Link from "next/link";
 import { Search } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
+import { answerSimilarity } from "@/lib/similarity";
 
 export default function AttemptsPage() {
   const { attempts, challenges } = useBbiduru();
@@ -48,8 +49,8 @@ export default function AttemptsPage() {
                     </div>
                     <div className="upload-report-info attempt-report-info">
                       <div className="upload-report-badges">
-                        <span className={`badge ${attempt.correct ? "badge-level" : "badge-soft"}`}>
-                          {attempt.correct ? "판독 성공" : "판독 아쉬움"}
+                        <span className="badge badge-soft">
+                          판독률 {Math.round(answerSimilarity(challenge.answer, attempt.answer) * 100)}%
                         </span>
                       </div>
                       <strong>{challenge.author}의 챌린지</strong>
