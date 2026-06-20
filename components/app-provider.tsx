@@ -15,7 +15,11 @@ import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
 import { initAnalytics, identifyUser } from "@/lib/analytics";
 import { answerSimilarity } from "@/lib/similarity";
-import { type Challenge, type Difficulty } from "@/lib/challenges";
+import {
+  deriveChallengeTags,
+  type Challenge,
+  type Difficulty,
+} from "@/lib/challenges";
 import {
   applyContribution,
   comboMilestoneMessage,
@@ -30,7 +34,7 @@ import {
   type ReportAttempt,
 } from "@/lib/reports";
 import { resetClientForPublicLaunch } from "@/lib/client-reset";
-import { parseChallengeTags, parseReactionCounts } from "@/lib/reactions";
+import { parseReactionCounts } from "@/lib/reactions";
 
 export type Attempt = {
   answer: string;
@@ -122,7 +126,7 @@ function normalizeStoredAttempts(value: string): Record<number, Attempt> {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbToChallenge(row: Record<string, any>): Challenge {
-  return {
+  const challenge: Challenge = {
     id: Number(row.id),
     handwriting: row.handwriting ?? "",
     imageData: row.image_url ?? undefined,
@@ -133,10 +137,12 @@ function dbToChallenge(row: Record<string, any>): Challenge {
     successRate: row.success_rate ?? 0,
     tries: row.tries ?? 0,
     hint: row.hint ?? "",
-    tags: parseChallengeTags(row.tags),
+    tags: [],
     reactionCounts: parseReactionCounts(row.tags),
     createdAt: row.created_at ?? undefined,
   };
+  challenge.tags = deriveChallengeTags(challenge);
+  return challenge;
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -249,10 +255,23 @@ export function AppProvider({ children }: { children: ReactNode }) {
       if (didReset) {
         await supabase.auth.signOut({ scope: "local" });
       }
-      const {
+      let {
         data: { session },
       } = await supabase.auth.getSession();
       if (cancelled) return;
+      let verifiedUser: User | null = null;
+      if (session) {
+        const {
+          data: { user: currentUser },
+          error: verifyError,
+        } = await supabase.auth.getUser();
+        if (verifyError || !currentUser) {
+          await supabase.auth.signOut({ scope: "local" });
+          session = null;
+        } else {
+          verifiedUser = currentUser;
+        }
+      }
       if (!session) {
         const { data, error } = await supabase.auth.signInAnonymously();
         if (cancelled) return;
@@ -263,8 +282,8 @@ export function AppProvider({ children }: { children: ReactNode }) {
         if (data.user) identifyUser(data.user.id);
         setUser(data.user);
       } else {
-        identifyUser(session.user.id);
-        setUser(session.user);
+        identifyUser(verifiedUser!.id);
+        setUser(verifiedUser);
       }
     }
 
@@ -618,17 +637,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         if (savedData?.challenge_stats) {
           setChallenges((current) =>
-            current.map((item) =>
-              item.id === id
-                ? {
-                    ...item,
-                    tries: Number(savedData.challenge_stats.tries ?? item.tries),
-                    successRate: Number(
-                      savedData.challenge_stats.success_rate ?? item.successRate,
-                    ),
-                  }
-                : item,
-            ),
+            current.map((item) => {
+              if (item.id !== id) return item;
+              const updated = {
+                ...item,
+                tries: Number(savedData.challenge_stats.tries ?? item.tries),
+                successRate: Number(
+                  savedData.challenge_stats.success_rate ?? item.successRate,
+                ),
+              };
+              return { ...updated, tags: deriveChallengeTags(updated) };
+            }),
           );
         }
       }

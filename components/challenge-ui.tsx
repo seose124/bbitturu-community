@@ -4,7 +4,11 @@ import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
 import { Check, Upload } from "lucide-react";
-import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
+import {
+  RATE_AGGREGATION_MIN_TRIES,
+  difficultyClass,
+  type Challenge,
+} from "@/lib/challenges";
 import { getKstDate } from "@/lib/progression";
 import { useBbiduru } from "@/components/app-provider";
 import { useRouter } from "next/navigation";
@@ -21,15 +25,13 @@ export function DifficultyBadge({
   );
 }
 
-function rateTodifficulty(successRate: number): Difficulty {
-  if (successRate >= 60) return "쉬움";
-  if (successRate >= 30) return "보통";
-  return "어려움";
-}
-
 export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
-  const difficulty = rateTodifficulty(challenge.successRate);
-  const isRatePending = challenge.tries < 5;
+  const difficulty = challenge.tags.includes("easy")
+    ? "쉬움"
+    : challenge.tags.includes("hard")
+      ? "어려움"
+      : null;
+  const isRatePending = challenge.tries < RATE_AGGREGATION_MIN_TRIES;
   const rateClass =
     challenge.successRate >= 50
       ? "rate-good"
@@ -65,14 +67,16 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
               <img src="/icons/icon-hot.svg" className="badge-icon" alt="" /> 인기
             </span>
           ) : null}
-          <span className="explore-tag">
-            <img
-              src={difficulty === "쉬움" ? "/icons/icon-easy.svg" : "/icons/icon-hard.svg"}
-              className="badge-icon"
-              alt=""
-            />
-            {difficulty}
-          </span>
+          {difficulty ? (
+            <span className="explore-tag">
+              <img
+                src={difficulty === "쉬움" ? "/icons/icon-easy.svg" : "/icons/icon-hard.svg"}
+                className="badge-icon"
+                alt=""
+              />
+              {difficulty}
+            </span>
+          ) : null}
           {challenge.tags.includes("new") ? (
             <span className="explore-tag">
               <img src="/icons/icon-new.svg" className="badge-icon" alt="" /> NEW

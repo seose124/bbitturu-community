@@ -179,19 +179,31 @@ export default function ResultPage() {
 
     try {
       const supabase = createClient();
-      const {
+      const sendReaction = (accessToken: string) =>
+        fetch(`/api/challenges/${challenge.id}/reactions`, {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: JSON.stringify({ reaction: key, active: !wasActive }),
+        });
+
+      let {
         data: { session },
       } = await supabase.auth.getSession();
-      const response = await fetch(`/api/challenges/${challenge.id}/reactions`, {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          ...(session?.access_token
-            ? { Authorization: `Bearer ${session.access_token}` }
-            : {}),
-        },
-        body: JSON.stringify({ reaction: key, active: !wasActive }),
-      });
+      let response = session
+        ? await sendReaction(session.access_token)
+        : new Response(null, { status: 401 });
+
+      if (response.status === 401) {
+        await supabase.auth.signOut({ scope: "local" });
+        const { data, error } = await supabase.auth.signInAnonymously();
+        if (error || !data.session) throw error ?? new Error("Anonymous auth failed");
+        session = data.session;
+        response = await sendReaction(session.access_token);
+      }
+
       if (!response.ok) throw new Error("Reaction update failed");
       const data = (await response.json()) as { counts: typeof reactionCounts };
       setReactionCounts(data.counts);
