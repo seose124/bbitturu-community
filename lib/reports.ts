@@ -45,10 +45,13 @@ export function buildChallengeReport(
     (attempt) => attempt.challengeId === challengeId && !attempt.passed,
   );
   const tries = valid.length || fallback?.tries || 0;
-  const correctCount = valid.filter((attempt) => attempt.correct).length;
-  const successRate = valid.length
+  // When no local attempts available, estimate correctCount from DB-stored success_rate
+  const correctCount = valid.length > 0
+    ? valid.filter((attempt) => attempt.correct).length
+    : Math.round(((fallback?.successRate ?? 0) / 100) * (fallback?.tries ?? 0));
+  const successRate = valid.length > 0
     ? Math.round((correctCount / valid.length) * 100)
-    : fallback?.successRate || 0;
+    : fallback?.successRate ?? 0;
   const wrongCounts = valid.reduce<Record<string, number>>((counts, attempt) => {
     if (attempt.correct || !attempt.answer.trim()) return counts;
     const answer = normalizeAnswer(attempt.answer);

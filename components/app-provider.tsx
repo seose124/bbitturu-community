@@ -471,7 +471,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const getChallengeReport = useCallback(
     (id: number) => {
       const challenge = challenges.find((item) => item.id === id);
-      return buildChallengeReport(id, reportAttempts, {
+      // Re-derive correct from similarity when is_correct is missing (old schema rows)
+      const enriched = challenge
+        ? reportAttempts.map((a) => ({
+            ...a,
+            correct:
+              a.correct ||
+              (!a.passed &&
+                a.challengeId === id &&
+                answerSimilarity(challenge.answer, a.answer) > 0.55),
+          }))
+        : reportAttempts;
+      return buildChallengeReport(id, enriched, {
         tries: challenge?.tries ?? 0,
         successRate: challenge?.successRate ?? 0,
       });
