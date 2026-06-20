@@ -3,13 +3,12 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
-import { Check, Upload } from "lucide-react";
+import { Upload } from "lucide-react";
 import {
   RATE_AGGREGATION_MIN_TRIES,
   difficultyClass,
   type Challenge,
 } from "@/lib/challenges";
-import { getKstDate } from "@/lib/progression";
 import { useBbiduru } from "@/components/app-provider";
 import { useRouter } from "next/navigation";
 
@@ -26,6 +25,8 @@ export function DifficultyBadge({
 }
 
 export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
+  const { attempts, showToast } = useBbiduru();
+  const completed = Boolean(attempts[challenge.id]);
   const difficulty = challenge.tags.includes("easy")
     ? "쉬움"
     : challenge.tags.includes("hard")
@@ -40,7 +41,13 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
         : "rate-hard";
 
   return (
-    <Link className="explore-card" href={`/challenges/${challenge.id}`}>
+    <Link
+      className="explore-card"
+      href={`/challenges/${challenge.id}${completed ? "/result" : ""}`}
+      onClick={() => {
+        if (completed) showToast("이미 판독 완료한 문제예요");
+      }}
+    >
       <div className={`explore-card-image${challenge.imageData ? " explore-card-image-photo" : ""}`}>
         {challenge.imageData ? (
           <img src={challenge.imageData} alt="악필" className="explore-card-img" />
@@ -91,9 +98,10 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
 export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { saveAttempt, showToast } = useBbiduru();
+  const { attempts, saveAttempt, showToast } = useBbiduru();
   const router = useRouter();
   const mountTimeRef = useRef<number | null>(null);
+  const completed = Boolean(attempts[challenge.id]);
 
   useEffect(() => {
     mountTimeRef.current = Date.now();
@@ -119,33 +127,50 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
         ) : (
           <span className="handwriting">{challenge.handwriting}</span>
         )}
+        {completed ? (
+          <div className="writing-complete-overlay" aria-hidden="true">
+            <img src="/icons/icon-challenge-complete.png" alt="" />
+          </div>
+        ) : null}
       </div>
-      <form className="home-answer" onSubmit={submit}>
-        <h3>뭐라고 쓴 건지 읽어보세요 🤔</h3>
-        <input
-          className="input"
-          value={answer}
-          onChange={(event) => setAnswer(event.target.value)}
-          placeholder="판독 결과를 입력하세요..."
-          aria-label={`${challenge.author}의 악필 판독 결과`}
-        />
-        <div className="button-row">
-          <button
-            className="button button-ghost button-small"
-            type="button"
-            onClick={() => showToast("다음 챌린지를 도전해보세요!")}
+      {completed ? (
+        <div className="home-answer home-completed-state">
+          <h3>판독 완료한 문제예요</h3>
+          <Link
+            className="button button-green button-small"
+            href={`/challenges/${challenge.id}/result`}
           >
-            모르겠어요 😅
-          </button>
-          <button
-            className="button button-green button-small button-grow"
-            type="submit"
-            disabled={!answer.trim() || submitting}
-          >
-            {submitting ? "제출 중..." : "제출하기"}
-          </button>
+            판독 결과 보기
+          </Link>
         </div>
-      </form>
+      ) : (
+        <form className="home-answer" onSubmit={submit}>
+          <h3>뭐라고 쓴 건지 읽어보세요 🤔</h3>
+          <input
+            className="input"
+            value={answer}
+            onChange={(event) => setAnswer(event.target.value)}
+            placeholder="판독 결과를 입력하세요..."
+            aria-label={`${challenge.author}의 악필 판독 결과`}
+          />
+          <div className="button-row">
+            <button
+              className="button button-ghost button-small"
+              type="button"
+              onClick={() => showToast("다음 챌린지를 도전해보세요!")}
+            >
+              모르겠어요 😅
+            </button>
+            <button
+              className="button button-green button-small button-grow"
+              type="submit"
+              disabled={!answer.trim() || submitting}
+            >
+              {submitting ? "제출 중..." : "제출하기"}
+            </button>
+          </div>
+        </form>
+      )}
     </article>
   );
 }
@@ -163,11 +188,7 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
   const router = useRouter();
   const mountTimeRef = useRef<number | null>(null);
   const storedAttempt = attempts[challenge.id];
-  const attempt =
-    storedAttempt?.isDaily &&
-    getKstDate(new Date(storedAttempt.createdAt)) === getKstDate()
-      ? storedAttempt
-      : undefined;
+  const attempt = storedAttempt;
 
   useEffect(() => {
     mountTimeRef.current = Date.now();
@@ -214,14 +235,19 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
         ) : (
           <span className="handwriting">{challenge.handwriting}</span>
         )}
+        {attempt ? (
+          <div className="writing-complete-overlay" aria-hidden="true">
+            <img src="/icons/icon-challenge-complete.png" alt="" />
+          </div>
+        ) : null}
       </div>
 
       {attempt ? (
         <div className="daily-case-state">
-          <span className="daily-case-complete"><Check size={18} /> 오늘의 미제 참여 완료</span>
+          <strong>판독 완료한 문제예요</strong>
           <p>판독단 +{attempt.xpEarned} XP · 현재 {stats.currentCombo}콤보</p>
           <Link className="button button-ghost button-small daily-result-link" href={`/challenges/${challenge.id}/result`}>
-            결과 다시 보기
+            판독 결과 보기
           </Link>
         </div>
       ) : (

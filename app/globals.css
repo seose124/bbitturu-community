@@ -469,6 +469,7 @@ p {
 }
 
 .home-writing {
+  position: relative;
   display: flex;
   min-height: 200px;
   align-items: center;
@@ -476,6 +477,29 @@ p {
   padding: 36px 28px;
   border-bottom: 1px solid var(--border);
   background: var(--surface);
+  overflow: hidden;
+}
+
+.writing-complete-overlay {
+  position: absolute;
+  z-index: 2;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgb(0 0 0 / 60%);
+  pointer-events: none;
+}
+
+.writing-complete-overlay img {
+  display: block;
+  width: 88px;
+  height: 64px;
+  object-fit: contain;
+}
+
+.home-completed-state {
+  justify-content: center;
 }
 
 .handwriting {
