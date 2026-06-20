@@ -45,9 +45,7 @@ export async function GET(request: Request) {
     });
 
     if (!error) {
-      const destination = new URL(next, origin);
-      destination.searchParams.set("auth", "confirmed");
-      return NextResponse.redirect(destination);
+      return NextResponse.redirect(`${origin}/auth/success`);
     }
   }
 
