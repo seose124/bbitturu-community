@@ -30,6 +30,7 @@ import {
   type ReportAttempt,
 } from "@/lib/reports";
 import { resetClientForPublicLaunch } from "@/lib/client-reset";
+import { parseChallengeTags, parseReactionCounts } from "@/lib/reactions";
 
 export type Attempt = {
   answer: string;
@@ -132,7 +133,8 @@ function dbToChallenge(row: Record<string, any>): Challenge {
     successRate: row.success_rate ?? 0,
     tries: row.tries ?? 0,
     hint: row.hint ?? "",
-    tags: row.tags ?? [],
+    tags: parseChallengeTags(row.tags),
+    reactionCounts: parseReactionCounts(row.tags),
     createdAt: row.created_at ?? undefined,
   };
 }
@@ -646,13 +648,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const deleteChallenge = useCallback(
     async (id: number) => {
       if (!user) throw new Error("로그인이 필요해요");
-      const { error } = await supabase
-        .from("challenges")
-        .delete()
-        .eq("id", id)
-        .eq("author_id", user.id);
-      if (error) throw error;
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const response = await fetch(`/api/challenges/${id}`, {
+        method: "DELETE",
+        headers: session?.access_token
+          ? { Authorization: `Bearer ${session.access_token}` }
+          : undefined,
+      });
+      if (!response.ok) throw new Error("챌린지를 삭제하지 못했어요");
       setChallenges((current) => current.filter((challenge) => challenge.id !== id));
+      setAttempts((current) => {
+        const next = { ...current };
+        delete next[id];
+        return next;
+      });
+      setReportAttempts((current) =>
+        current.filter((attempt) => attempt.challengeId !== id),
+      );
+      window.localStorage.removeItem(`bbitturu-reactions:${id}`);
     },
     [user],
   );

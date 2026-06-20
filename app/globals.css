@@ -50,6 +50,8 @@ body {
 
 html {
   background: #1c1c18;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
 }
 
 body {
@@ -298,6 +300,10 @@ p {
   text-align: center;
 }
 
+.nav-item[href="/profile"] img {
+  transform: translateX(3px);
+}
+
 .floating-upload {
   position: absolute;
   z-index: 50;
@@ -426,7 +432,11 @@ p {
 }
 
 .section-heading-spaced {
-  margin-top: 20px;
+  margin-top: 0;
+}
+
+.home-content > section + section {
+  margin-top: 44px;
 }
 
 .section-heading h2 {
@@ -1764,7 +1774,7 @@ p {
 
 .explore-card-image {
   display: flex;
-  height: 160px;
+  height: 158px;
   align-items: center;
   justify-content: center;
   padding: 20px;
@@ -1786,14 +1796,21 @@ p {
 }
 
 .explore-card-info {
-  padding: 12px 14px 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
+  display: grid;
+  grid-template-areas:
+    "meta rate"
+    "tags rate";
+  grid-template-columns: minmax(0, 1fr) auto;
+  grid-template-rows: auto 28px;
+  column-gap: 14px;
+  row-gap: 7px;
   min-width: 0;
+  min-height: 79px;
+  padding: 10px 14px 11px;
 }
 
 .explore-card-meta {
+  grid-area: meta;
   color: var(--ink-sub);
   font-size: 13px;
   line-height: 1.4;
@@ -1805,18 +1822,17 @@ p {
 }
 
 .explore-card-summary {
-  display: flex;
-  align-items: flex-start;
-  justify-content: space-between;
-  gap: 14px;
+  display: contents;
 }
 
 .explore-rate-block {
+  grid-area: rate;
   display: flex;
   flex: 0 0 auto;
   flex-direction: column;
   align-items: flex-end;
-  gap: 3px;
+  justify-content: space-between;
+  padding: 1px 0;
 }
 
 .explore-rate-block > span {
@@ -1833,9 +1849,11 @@ p {
 }
 
 .explore-card-tags {
+  grid-area: tags;
   display: flex;
   flex-wrap: wrap;
   gap: 6px;
+  align-self: end;
 }
 
 .explore-tag {
@@ -2060,6 +2078,11 @@ p {
 
 .info-body {
   padding: 24px 20px 0;
+}
+
+.info-scroll,
+.info-scroll * {
+  font-family: Pretendard, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif !important;
 }
 
 .info-body:has(.about-hero) {
@@ -2688,7 +2711,7 @@ p {
 }
 
 .daily-case-section {
-  margin-bottom: 22px;
+  margin-bottom: 0;
 }
 
 .daily-contribution {
@@ -2709,6 +2732,15 @@ p {
   padding: 14px 16px;
   border-bottom: 1px solid var(--dark-border);
   color: var(--dark-sub);
+  font-size: 11px;
+}
+
+.daily-case-badge {
+  min-height: 28px;
+  border: 1px solid #5c6744;
+  background: transparent;
+  color: var(--dark-text);
+  padding: 5px 10px;
   font-size: 11px;
 }
 
@@ -2742,6 +2774,24 @@ p {
 .daily-case-state p {
   color: var(--dark-sub);
   font-size: 13px;
+}
+
+.daily-result-link {
+  min-height: 40px;
+  border-color: #4b4c42;
+  background: transparent;
+  color: var(--dark-sub);
+  font-size: 12px;
+}
+
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea,
+  .input,
+  .textarea {
+    font-size: 16px;
+  }
 }
 
 .daily-case-empty {
@@ -2988,9 +3038,14 @@ p {
 }
 
 .upload-report-card {
-  display: grid;
-  grid-template-columns: 96px 1fr;
+  position: relative;
   min-height: 118px;
+}
+
+.upload-report-link {
+  display: grid;
+  min-height: 118px;
+  grid-template-columns: 96px 1fr;
 }
 
 .upload-report-thumb {
@@ -3015,7 +3070,28 @@ p {
 
 .upload-report-info {
   min-width: 0;
-  padding: 14px;
+  padding: 14px 46px 14px 14px;
+}
+
+.upload-report-delete {
+  position: absolute;
+  top: 10px;
+  right: 10px;
+  display: inline-flex;
+  width: 32px;
+  height: 32px;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--ink-sub);
+  cursor: pointer;
+}
+
+.upload-report-delete:disabled {
+  cursor: wait;
+  opacity: 0.45;
 }
 
 .upload-report-badges {

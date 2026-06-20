@@ -28,6 +28,11 @@ export default function LoginPage() {
         next: params.get("next") || "/profile",
       }),
     );
+    if (params.get("error")) {
+      queueMicrotask(() =>
+        setError("로그인 링크가 만료됐거나 이미 사용됐어요. 새 링크를 받아주세요."),
+      );
+    }
   }, []);
 
   const submit = async (event: FormEvent) => {

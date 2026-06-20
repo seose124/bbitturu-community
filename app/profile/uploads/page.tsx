@@ -1,7 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { FileText, Upload } from "lucide-react";
+import { FileText, Trash2, Upload } from "lucide-react";
+import { useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
 
@@ -12,7 +13,15 @@ function stateLabel(tries: number) {
 }
 
 export default function UploadsPage() {
-  const { user, challenges, notifications, getChallengeReport } = useBbiduru();
+  const {
+    user,
+    challenges,
+    notifications,
+    getChallengeReport,
+    deleteChallenge,
+    showToast,
+  } = useBbiduru();
+  const [deletingId, setDeletingId] = useState<number | null>(null);
   const uploads = challenges
     .filter((challenge) => challenge.authorId === user?.id)
     .map((challenge) => ({
@@ -25,6 +34,19 @@ export default function UploadsPage() {
     }))
     .sort((a, b) => Number(b.unread) - Number(a.unread));
 
+  const removeChallenge = async (id: number) => {
+    if (!window.confirm("이 챌린지와 모인 판독 결과를 모두 삭제할까요?")) return;
+    setDeletingId(id);
+    try {
+      await deleteChallenge(id);
+      showToast("업로드한 챌린지를 삭제했어요");
+    } catch {
+      showToast("삭제하지 못했어요. 잠시 후 다시 시도해주세요");
+    } finally {
+      setDeletingId(null);
+    }
+  };
+
   return (
     <Page>
       <div className="page-column">
@@ -33,31 +55,44 @@ export default function UploadsPage() {
           {uploads.length ? (
             <div className="upload-report-list">
               {uploads.map(({ challenge, report, unread }) => (
-                <Link
+                <article
                   className="upload-report-card card outlined"
-                  href={`/profile/uploads/${challenge.id}`}
                   key={challenge.id}
                 >
-                  <div className="upload-report-thumb">
-                    {challenge.imageData ? (
-                      <img src={challenge.imageData} alt="내가 올린 악필" />
-                    ) : (
-                      <span className="handwriting">{challenge.handwriting}</span>
-                    )}
-                  </div>
-                  <div className="upload-report-info">
-                    <div className="upload-report-badges">
-                      <span className={`badge ${report.tries >= 5 ? "badge-level" : "badge-soft"}`}>
-                        {stateLabel(report.tries)}
-                      </span>
-                      {unread ? <span className="badge badge-new">새 결과</span> : null}
+                  <Link
+                    className="upload-report-link"
+                    href={`/profile/uploads/${challenge.id}`}
+                  >
+                    <div className="upload-report-thumb">
+                      {challenge.imageData ? (
+                        <img src={challenge.imageData} alt="내가 올린 악필" />
+                      ) : (
+                        <span className="handwriting">{challenge.handwriting}</span>
+                      )}
                     </div>
-                    <strong>{challenge.answer}</strong>
-                    <p>
-                      {report.tries}명 도전 · {report.tries ? `성공률 ${report.successRate}%` : "첫 판독을 기다려요"}
-                    </p>
-                  </div>
-                </Link>
+                    <div className="upload-report-info">
+                      <div className="upload-report-badges">
+                        <span className={`badge ${report.tries >= 5 ? "badge-level" : "badge-soft"}`}>
+                          {stateLabel(report.tries)}
+                        </span>
+                        {unread ? <span className="badge badge-new">새 결과</span> : null}
+                      </div>
+                      <strong>{challenge.answer}</strong>
+                      <p>
+                        {report.tries}명 도전 · {report.tries ? `성공률 ${report.successRate}%` : "첫 판독을 기다려요"}
+                      </p>
+                    </div>
+                  </Link>
+                  <button
+                    className="upload-report-delete"
+                    type="button"
+                    disabled={deletingId === challenge.id}
+                    onClick={() => void removeChallenge(challenge.id)}
+                    aria-label={`${challenge.answer} 챌린지 삭제`}
+                  >
+                    <Trash2 size={16} />
+                  </button>
+                </article>
               ))}
             </div>
           ) : (

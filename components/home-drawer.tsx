@@ -78,7 +78,7 @@ export function HomeDrawer({
         </nav>
         <footer className="drawer-footer">
           <strong className="brand-font">삐뚜루</strong>
-          <span>v1.0.0 Beta · © 2026 Bbiduru</span>
+          <span>v1.0.0 Beta · © 2026 bbitturu</span>
         </footer>
       </aside>
     </>

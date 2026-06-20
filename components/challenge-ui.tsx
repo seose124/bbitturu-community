@@ -86,13 +86,19 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   const [submitting, setSubmitting] = useState(false);
   const { saveAttempt, showToast } = useBbiduru();
   const router = useRouter();
-  const mountTimeRef = useRef(Date.now());
+  const mountTimeRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
-    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    const timeSpent = mountTimeRef.current
+      ? Math.round((Date.now() - mountTimeRef.current) / 1000)
+      : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
@@ -142,7 +148,7 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const [submitting, setSubmitting] = useState(false);
   const { attempts, stats, saveAttempt } = useBbiduru();
   const router = useRouter();
-  const mountTimeRef = useRef(Date.now());
+  const mountTimeRef = useRef<number | null>(null);
   const storedAttempt = attempts[challenge.id];
   const attempt =
     storedAttempt?.isDaily &&
@@ -150,11 +156,17 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
       ? storedAttempt
       : undefined;
 
+  useEffect(() => {
+    mountTimeRef.current = Date.now();
+  }, []);
+
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
-    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    const timeSpent = mountTimeRef.current
+      ? Math.round((Date.now() - mountTimeRef.current) / 1000)
+      : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
@@ -163,7 +175,9 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const pass = async () => {
     if (submitting) return;
     setSubmitting(true);
-    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    const timeSpent = mountTimeRef.current
+      ? Math.round((Date.now() - mountTimeRef.current) / 1000)
+      : 0;
     trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
     await saveAttempt(challenge.id, "", true);
     router.push(`/challenges/${challenge.id}/result`);
@@ -172,7 +186,7 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   return (
     <article className="daily-case-card home-challenge-card">
       <div className="daily-case-heading">
-        <span className="badge badge-level">오늘의 미제</span>
+        <span className="badge daily-case-badge">오늘의 미제</span>
         <span>
           {challenge.tries}명 도전 · 성공률 {challenge.successRate}%
         </span>
@@ -188,9 +202,8 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
       {attempt ? (
         <div className="daily-case-state">
           <span className="daily-case-complete"><Check size={18} /> 오늘의 미제 참여 완료</span>
-          <strong>{attempt.correct ? "미제를 해결했어요" : "정답을 확인했어요"}</strong>
           <p>판독단 +{attempt.xpEarned} XP · 현재 {stats.currentCombo}콤보</p>
-          <Link className="button button-green button-small" href={`/challenges/${challenge.id}/result`}>
+          <Link className="button button-ghost button-small daily-result-link" href={`/challenges/${challenge.id}/result`}>
             결과 다시 보기
           </Link>
         </div>
@@ -293,7 +306,7 @@ export function DailyCaseEmpty() {
     <article className="daily-case-card daily-case-empty card outlined">
       <img src="/logo-symbol.png" width={40} height={40} alt="" />
       <div>
-        <span className="badge badge-level">오늘의 미제</span>
+        <span className="badge daily-case-badge">오늘의 미제</span>
         <h3>오늘의 미제를 기다리고 있어요</h3>
         <p>첫 사건을 등록하면 판독단이 모여들어요.</p>
       </div>

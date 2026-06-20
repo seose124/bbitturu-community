@@ -9,13 +9,12 @@ import { trackAnswerRevealed, trackCrowdInterestClicked } from "@/lib/analytics"
 import { Page, TopBar } from "@/components/layout";
 import { comboMilestoneMessage } from "@/lib/progression";
 import { answerSimilarity, charMatchRate } from "@/lib/similarity";
-
-const initialReactions = [
-  { icon: "😂", count: 0 },
-  { icon: "🤯", count: 0 },
-  { icon: "👏", count: 0 },
-  { icon: "🤔", count: 0 },
-];
+import { createClient } from "@/lib/supabase";
+import {
+  emptyReactionCounts,
+  reactionOptions,
+  type ReactionKey,
+} from "@/lib/reactions";
 
 function ColorizedAnswer({
   answer,
@@ -90,7 +89,9 @@ export default function ResultPage() {
   const challenge = getChallenge(Number(params.id));
   const attempt = attempts[Number(params.id)];
   const [progressVisible, setProgressVisible] = useState(false);
-  const [liked, setLiked] = useState<number[]>([]);
+  const [liked, setLiked] = useState<ReactionKey[]>([]);
+  const [reactionCounts, setReactionCounts] = useState(emptyReactionCounts);
+  const [pendingReaction, setPendingReaction] = useState<ReactionKey | null>(null);
   const [interestSent, setInterestSent] = useState(false);
   const revealTrackedRef = useRef(false);
 
@@ -98,6 +99,23 @@ export default function ResultPage() {
     const timer = window.setTimeout(() => setProgressVisible(true), 120);
     return () => window.clearTimeout(timer);
   }, []);
+
+  useEffect(() => {
+    if (!challenge) return;
+    queueMicrotask(() => {
+      setReactionCounts(challenge.reactionCounts);
+      try {
+        const saved = JSON.parse(
+          window.localStorage.getItem(`bbitturu-reactions:${challenge.id}`) ?? "[]",
+        ) as ReactionKey[];
+        setLiked(
+          saved.filter((key) => reactionOptions.some((item) => item.key === key)),
+        );
+      } catch {
+        window.localStorage.removeItem(`bbitturu-reactions:${challenge.id}`);
+      }
+    });
+  }, [challenge]);
 
   const correct = useMemo(
     () =>
@@ -144,6 +162,51 @@ export default function ResultPage() {
   const avgRate = Math.min(100, Math.max(0, Math.round(challenge.successRate)));
   const hasCommunityAverage = challenge.tries >= 5;
   const displayedAvgRate = hasCommunityAverage ? avgRate : 0;
+
+  const toggleReaction = async (key: ReactionKey) => {
+    if (pendingReaction) return;
+    const wasActive = liked.includes(key);
+    const nextLiked = wasActive
+      ? liked.filter((item) => item !== key)
+      : [...liked, key];
+    const previousCounts = reactionCounts;
+    setLiked(nextLiked);
+    setReactionCounts((current) => ({
+      ...current,
+      [key]: Math.max(0, current[key] + (wasActive ? -1 : 1)),
+    }));
+    setPendingReaction(key);
+
+    try {
+      const supabase = createClient();
+      const {
+        data: { session },
+      } = await supabase.auth.getSession();
+      const response = await fetch(`/api/challenges/${challenge.id}/reactions`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          ...(session?.access_token
+            ? { Authorization: `Bearer ${session.access_token}` }
+            : {}),
+        },
+        body: JSON.stringify({ reaction: key, active: !wasActive }),
+      });
+      if (!response.ok) throw new Error("Reaction update failed");
+      const data = (await response.json()) as { counts: typeof reactionCounts };
+      setReactionCounts(data.counts);
+      window.localStorage.setItem(
+        `bbitturu-reactions:${challenge.id}`,
+        JSON.stringify(nextLiked),
+      );
+    } catch {
+      setLiked(liked);
+      setReactionCounts(previousCounts);
+      showToast("반응을 저장하지 못했어요. 다시 눌러주세요");
+    } finally {
+      setPendingReaction(null);
+    }
+  };
 
   return (
     <Page>
@@ -222,22 +285,19 @@ export default function ResultPage() {
               </div>
 
               <div className="reaction-row">
-                {initialReactions.map((reaction, index) => {
-                  const active = liked.includes(index);
+                {reactionOptions.map((reaction) => {
+                  const active = liked.includes(reaction.key);
                   return (
                     <button
                       className={`reaction-chip ${active ? "liked" : ""}`}
                       key={reaction.icon}
-                      onClick={() =>
-                        setLiked((current) =>
-                          active
-                            ? current.filter((item) => item !== index)
-                            : [...current, index],
-                        )
-                      }
+                      type="button"
+                      disabled={pendingReaction !== null}
+                      onClick={() => void toggleReaction(reaction.key)}
+                      aria-pressed={active}
                     >
                       {reaction.icon}
-                      <span>{reaction.count + (active ? 1 : 0)}</span>
+                      <span>{reactionCounts[reaction.key]}</span>
                     </button>
                   );
                 })}
