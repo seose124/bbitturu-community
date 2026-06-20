@@ -164,6 +164,29 @@ function dbToAttempt(row: Record<string, any>): Attempt {
   };
 }
 
+function deriveCurrentCombo(
+  rows: Array<{
+    user_id?: string;
+    is_pass?: boolean;
+    is_correct?: boolean;
+  }>,
+  userId: string,
+) {
+  let combo = 0;
+  for (const row of rows) {
+    if (row.user_id !== userId) continue;
+    if (row.is_pass || !row.is_correct) break;
+    combo += 1;
+  }
+  return combo;
+}
+
+function isTodayDailyAttempt(attempt?: Attempt) {
+  return Boolean(
+    attempt?.isDaily && getKstDate(new Date(attempt.createdAt)) === getKstDate(),
+  );
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbToReportAttempt(row: Record<string, any>): ReportAttempt {
   return {
@@ -279,6 +302,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
         ]);
       if (cancelled) return;
 
+      let derivedCombo: number | null = null;
       if (!attemptResult.error && attemptResult.data) {
         const ownAttempts: Record<number, Attempt> = {};
         for (const row of attemptResult.data) {
@@ -288,9 +312,21 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
         setAttempts((current) => ({ ...current, ...ownAttempts }));
         setReportAttempts(attemptResult.data.map(dbToReportAttempt));
+        derivedCombo = deriveCurrentCombo(attemptResult.data, user!.id);
       }
-      if (!statsResult.error && statsResult.data) {
-        setStats(dbToStats(statsResult.data));
+      if (!statsResult.error) {
+        const loadedStats = statsResult.data
+          ? dbToStats(statsResult.data)
+          : defaultUserStats;
+        setStats(
+          derivedCombo === null
+            ? loadedStats
+            : {
+                ...loadedStats,
+                currentCombo: derivedCombo,
+                maxCombo: Math.max(loadedStats.maxCombo, derivedCombo),
+              },
+        );
       }
       if (!notificationResult.error && notificationResult.data) {
         setNotifications(notificationResult.data.map(dbToNotification));
@@ -318,17 +354,29 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const selected = dailyChallengeId
       ? challenges.find((challenge) => challenge.id === dailyChallengeId)
       : undefined;
-    if (selected) return selected;
+    if (
+      selected &&
+      selected.authorId !== user?.id &&
+      (!attempts[selected.id] || isTodayDailyAttempt(attempts[selected.id]))
+    ) {
+      return selected;
+    }
     if (!challenges.length) return undefined;
-    const preferred = challenges.filter(
+    const available = challenges.filter(
+      (challenge) =>
+        challenge.authorId !== user?.id &&
+        (!attempts[challenge.id] || isTodayDailyAttempt(attempts[challenge.id])),
+    );
+    if (!available.length) return undefined;
+    const preferred = available.filter(
       (challenge) => challenge.tries >= 3 && challenge.successRate < 35,
     );
-    const candidates = preferred.length ? preferred : challenges;
+    const candidates = preferred.length ? preferred : available;
     const dayNumber = Math.floor(
       new Date(`${getKstDate()}T00:00:00+09:00`).getTime() / 86_400_000,
     );
     return candidates[Math.abs(dayNumber) % candidates.length];
-  }, [challenges, dailyChallengeId]);
+  }, [attempts, challenges, dailyChallengeId, user?.id]);
 
   const dailyProgress =
     stats.dailyActivityDate === getKstDate()
@@ -486,7 +534,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
 
       setAttempts((current) => ({ ...current, [id]: attempt }));
       setStats(nextStats);
-      const comboMilestone = comboMilestoneMessage(attempt.comboAfter);
       setReportAttempts((current) => [
         ...current,
         {
@@ -510,36 +557,37 @@ export function AppProvider({ children }: { children: ReactNode }) {
         );
       }
 
+      let persistedAttempt = attempt;
+      let persistedStats = nextStats;
       if (user) {
-        const { data, error } = await supabase.rpc("submit_attempt", {
-          p_challenge_id: id,
-          p_answer: cleanAnswer,
-          p_is_pass: passed,
-          p_is_daily: isDaily,
-        });
-        let savedData = data;
-        if (error) {
-          const {
-            data: { session },
-          } = await supabase.auth.getSession();
-          if (session) {
-            const response = await fetch("/api/attempts", {
-              method: "POST",
-              headers: {
-                Authorization: `Bearer ${session.access_token}`,
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({
-                challengeId: id,
-                answer: cleanAnswer,
-                passed,
-                isDaily,
-              }),
-            });
-            if (response.ok) savedData = await response.json();
-          }
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+        let savedData;
+        if (session) {
+          const response = await fetch("/api/attempts", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${session.access_token}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              challengeId: id,
+              answer: cleanAnswer,
+              passed,
+              isDaily,
+            }),
+          });
+          if (response.ok) savedData = await response.json();
         }
-        if (savedData?.stats) setStats(dbToStats(savedData.stats));
+        if (savedData?.attempt) {
+          persistedAttempt = dbToAttempt(savedData.attempt);
+          setAttempts((current) => ({ ...current, [id]: persistedAttempt }));
+        }
+        if (savedData?.stats) {
+          persistedStats = dbToStats(savedData.stats);
+          setStats(persistedStats);
+        }
         if (savedData?.challenge_stats) {
           setChallenges((current) =>
             current.map((item) =>
@@ -557,13 +605,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
         }
       }
 
-      if (getLevel("interpreter", nextStats.interpreterXp).current.level > previousLevel) {
+      if (getLevel("interpreter", persistedStats.interpreterXp).current.level > previousLevel) {
         maybePromptLogin("level");
       }
-      if (correct && comboMilestone) {
-        showToast(`${attempt.comboAfter}콤보 달성 · ${comboMilestone}`);
+      const comboMilestone = comboMilestoneMessage(persistedAttempt.comboAfter);
+      if (persistedAttempt.correct && comboMilestone) {
+        showToast(`${persistedAttempt.comboAfter}콤보 달성 · ${comboMilestone}`);
       }
-      return attempt;
+      return persistedAttempt;
     },
     [attempts, challenges, dailyChallenge?.id, maybePromptLogin, showToast, stats, user],
   );

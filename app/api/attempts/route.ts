@@ -125,6 +125,24 @@ export async function POST(request: NextRequest) {
       (isDaily ? 3 : 0)
     : 0;
   const currentStats = statsFromRow(currentStatsRow);
+  const { data: recentAttempts } = await admin
+    .from("attempts")
+    .select("is_correct, is_pass")
+    .eq("user_id", user.id)
+    .order("created_at", { ascending: false })
+    .limit(100);
+  let derivedCombo = 0;
+  for (const previousAttempt of recentAttempts ?? []) {
+    if (
+      previousAttempt.is_pass ||
+      !previousAttempt.is_correct
+    ) {
+      break;
+    }
+    derivedCombo += 1;
+  }
+  currentStats.currentCombo = derivedCombo;
+  currentStats.maxCombo = Math.max(currentStats.maxCombo, derivedCombo);
   const nextStats = applyContribution(currentStats, {
     track: "interpreter",
     xp: baseXp,

@@ -64,7 +64,11 @@ export default function UploadsPage() {
             <div className="empty-state fill upload-report-empty">
               <FileText size={30} />
               <strong>아직 올린 악필이 없어요</strong>
-              <span>글씨 하나만 올리면 판독단의 집단 눈썰미를 확인할 수 있어요.</span>
+              <span className="upload-empty-copy">
+                글씨 하나만 올리면 판독단의 집단 눈썰미를
+                <br />
+                확인할 수 있어요.
+              </span>
               <Link className="button button-green button-inline" href="/upload">
                 <Upload size={16} /> 첫 악필 등록하기
               </Link>

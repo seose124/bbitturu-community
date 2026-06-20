@@ -4,6 +4,7 @@ import { useState, type FormEvent } from "react";
 import Link from "next/link";
 import { Check, Flame, Upload } from "lucide-react";
 import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
+import { getKstDate } from "@/lib/progression";
 import { useBbiduru } from "@/components/app-provider";
 import { useRouter } from "next/navigation";
 
@@ -44,22 +45,35 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
         )}
       </div>
       <div className="explore-card-info">
-        <p className="explore-card-meta">판독 {challenge.tries}명 · {challenge.author}</p>
-        <div className="explore-card-footer">
-          <div className="badge-row">
-            <span className={`badge ${difficultyClass[difficulty]}`}>{difficulty}</span>
-            {challenge.tags.includes("hot") ? (
-              <span className="badge badge-soft">
-                <img src="/icons/icon-hot.svg" className="badge-icon" alt="" /> 인기
-              </span>
-            ) : null}
-            {challenge.tags.includes("new") ? (
-              <span className="badge badge-new">
-                <img src="/icons/icon-new.svg" className="badge-icon" alt="" /> NEW
-              </span>
-            ) : null}
+        <div className="explore-card-summary">
+          <p className="explore-card-meta">
+            <strong>{challenge.author}</strong>
+            <span> · {challenge.tries}명 참여</span>
+          </p>
+          <div className="explore-rate-block">
+            <span>평균 판독률</span>
+            <strong className={rateClass}>{challenge.successRate}%</strong>
           </div>
-          <span className={`explore-rate ${rateClass}`}>{challenge.successRate}%</span>
+        </div>
+        <div className="explore-card-tags">
+          {challenge.tags.includes("hot") ? (
+            <span className="explore-tag">
+              <img src="/icons/icon-hot.svg" className="badge-icon" alt="" /> 인기
+            </span>
+          ) : null}
+          <span className="explore-tag">
+            <img
+              src={difficulty === "쉬움" ? "/icons/icon-easy.svg" : "/icons/icon-hard.svg"}
+              className="badge-icon"
+              alt=""
+            />
+            {difficulty}
+          </span>
+          {challenge.tags.includes("new") ? (
+            <span className="explore-tag">
+              <img src="/icons/icon-new.svg" className="badge-icon" alt="" /> NEW
+            </span>
+          ) : null}
         </div>
       </div>
     </Link>
@@ -124,7 +138,12 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const [submitting, setSubmitting] = useState(false);
   const { user, attempts, stats, saveAttempt } = useBbiduru();
   const router = useRouter();
-  const attempt = attempts[challenge.id];
+  const storedAttempt = attempts[challenge.id];
+  const attempt =
+    storedAttempt?.isDaily &&
+    getKstDate(new Date(storedAttempt.createdAt)) === getKstDate()
+      ? storedAttempt
+      : undefined;
   const isOwner = Boolean(user && challenge.authorId === user.id);
 
   const submit = async (event: FormEvent) => {

@@ -36,6 +36,7 @@ function UploadTopBtn() {
   const hidden =
     pathname.startsWith("/upload") ||
     /^\/challenges\/\d+/.test(pathname) ||
+    /^\/profile\/uploads\/[^/]+/.test(pathname) ||
     ["/about", "/privacy", "/terms", "/contact"].includes(pathname);
   if (hidden) return null;
   return (
@@ -144,6 +145,7 @@ export function FloatingUpload() {
   const hidden =
     pathname.startsWith("/upload") ||
     /^\/challenges\/\d+/.test(pathname) ||
+    /^\/profile\/uploads\/[^/]+/.test(pathname) ||
     ["/about", "/privacy", "/terms", "/contact"].includes(pathname);
 
   if (hidden) return null;

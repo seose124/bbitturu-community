@@ -279,7 +279,9 @@ export default function ResultPage() {
             다음 챌린지 도전 →
           </button>
           <p className="result-combo-note">
-            연속 판독해서 콤보를 획득하세요!
+            {attempt && attempt.comboAfter > 0
+              ? `현재 ${attempt.comboAfter}콤보 · 연속 정답 기록 중!`
+              : "연속 판독해서 콤보를 획득하세요!"}
           </p>
         </div>
       </div>

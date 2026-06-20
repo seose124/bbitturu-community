@@ -49,7 +49,10 @@ export function HomeDrawer({
         aria-hidden={!open}
       >
         <div className="drawer-header">
-          <span className="brand-font">삐뚜루</span>
+          <div className="drawer-brand">
+            <img src="/logo-symbol.png" width={28} height={28} alt="" />
+            <span className="brand-font">삐뚜루</span>
+          </div>
           <button className="icon-button" onClick={onClose} aria-label="닫기">
             <X size={19} strokeWidth={2.2} />
           </button>

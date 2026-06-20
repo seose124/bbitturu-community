@@ -91,9 +91,16 @@ export function applyContribution(
   today = getKstDate(),
 ) {
   if (!options.valid) {
-    return options.correct === false
-      ? { ...stats, currentCombo: 0, comboDate: today }
-      : stats;
+    if (options.track !== "interpreter" || options.correct === undefined) {
+      return stats;
+    }
+    const currentCombo = options.correct ? stats.currentCombo + 1 : 0;
+    return {
+      ...stats,
+      currentCombo,
+      maxCombo: Math.max(stats.maxCombo, currentCombo),
+      comboDate: today,
+    };
   }
 
   const firstActivityToday = stats.lastContributionDate !== today;

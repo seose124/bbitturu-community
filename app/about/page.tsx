@@ -1,10 +1,15 @@
+import Link from "next/link";
 import { InfoPage, InfoSection } from "@/components/info-page";
+import { interpreterLevels, uploaderLevels } from "@/lib/progression";
 
 export default function AboutPage() {
   return (
     <InfoPage title="삐뚜루 소개">
       <div className="about-hero">
-        <div className="brand-font">삐뚜루</div>
+        <div className="about-brand">
+          <img src="/logo-symbol.png" width={54} height={54} alt="" />
+          <div className="brand-font">삐뚜루</div>
+        </div>
         <p>
           악필 판독 커뮤니티
           <br />
@@ -28,20 +33,40 @@ export default function AboutPage() {
             <li>결과 공유: SNS에 판독 결과 자랑하기</li>
           </ul>
         </InfoSection>
-        <InfoSection title="판독 레벨 시스템">
-          <ul>
-            <li>삐뚤이: 판독 입문자 (0~49회)</li>
-            <li>판독단: 꾸준한 판독러 (50~199회)</li>
-            <li>판독사: 악필 전문가 (200~499회)</li>
-            <li>판독왕: 전설의 판독러 (500회 이상)</li>
-          </ul>
+        <InfoSection title="레벨 시스템">
+          <div className="about-level-columns">
+            <div className="about-level-track">
+              <strong>판독단</strong>
+              <ul>
+                {interpreterLevels.map((level) => (
+                  <li key={level.level}>
+                    <span>Lv.{level.level} {level.title}</span>
+                    <b>{level.xp} XP</b>
+                  </li>
+                ))}
+              </ul>
+            </div>
+            <div className="about-level-track">
+              <strong>악필러</strong>
+              <ul>
+                {uploaderLevels.map((level) => (
+                  <li key={level.level}>
+                    <span>Lv.{level.level} {level.title}</span>
+                    <b>{level.xp} XP</b>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          </div>
         </InfoSection>
         <InfoSection title="만든 사람들">
           <p>
             삐뚜루는 악필로 인한 소통의 불편함을 유머로 승화시키고
             싶었던 팀이 만들었어요.
           </p>
-          <p>문의: hello@bbiduru.app</p>
+          <Link className="about-contact-link" href="/contact">
+            관리자에게 문의하기 →
+          </Link>
         </InfoSection>
       </div>
     </InfoPage>
