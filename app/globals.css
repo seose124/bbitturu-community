@@ -2306,24 +2306,8 @@ p {
   font-weight: 800;
 }
 
-.contact-form {
-  flex: 1;
-  min-height: 0;
-}
-
-.contact-form .contact-content {
-  padding-bottom: 0;
-}
-
 .contact-content {
   gap: 18px;
-}
-
-.contact-submit-bar {
-  flex-shrink: 0;
-  padding: 12px 20px calc(12px + var(--safe-bottom));
-  border-top: 1px solid var(--border);
-  background: var(--surface);
 }
 
 .contact-textarea {
