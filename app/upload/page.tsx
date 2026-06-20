@@ -1,6 +1,14 @@
 "use client";
 
 import { FormEvent, useEffect, useRef, useState } from "react";
+import {
+  trackUploadPageViewed,
+  trackPhotoAttached,
+  trackAnswerInputStarted,
+  trackAnswerInputCompleted,
+  trackUploadCompleted,
+  trackUploadFailed,
+} from "@/lib/analytics";
 import { Camera, Rocket } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
@@ -40,11 +48,14 @@ export default function UploadPage() {
   const [nickname, setNickname] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
+  const answerStartedRef = useRef(false);
+  const answerStartTimeRef = useRef<number | null>(null);
   const valid = Boolean(image && answer.trim());
 
   useEffect(() => {
     const saved = window.localStorage.getItem(NICKNAME_KEY);
     if (saved) queueMicrotask(() => setNickname(saved));
+    trackUploadPageViewed("home_cta");
   }, []);
 
   const handleImageChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -60,6 +71,7 @@ export default function UploadPage() {
     }
     try {
       setImage(await compressImage(file));
+      trackPhotoAttached(Math.round(file.size / 1024));
     } catch {
       showToast("이미지를 처리할 수 없어요");
     }
@@ -74,15 +86,17 @@ export default function UploadPage() {
     }
     setSubmitting(true);
     try {
+      const trimmedAnswer = answer.trim();
       const challenge = await addChallenge({
         imageData: image!,
-        answer: answer.trim(),
+        answer: trimmedAnswer,
         hint: hint.trim() || undefined,
         author: nickname.trim() || undefined,
       });
       if (nickname.trim()) {
         window.localStorage.setItem(NICKNAME_KEY, nickname.trim());
       }
+      trackUploadCompleted(challenge.id, Boolean(hint.trim()), trimmedAnswer.replace(/\s/g, "").length);
       router.push(`/upload/success/${challenge.id}`);
     } catch (err) {
       const msg =
@@ -92,6 +106,7 @@ export default function UploadPage() {
             ? String((err as { message: unknown }).message)
             : "";
       console.error("[bbiduru] 업로드 실패:", err);
+      trackUploadFailed("unknown", "submit");
       showToast(msg || "업로드에 실패했어요. 다시 시도해주세요.");
       setSubmitting(false);
     }
@@ -149,7 +164,21 @@ export default function UploadPage() {
             <input
               className="input"
               value={answer}
-              onChange={(e) => setAnswer(e.target.value)}
+              onChange={(e) => {
+                setAnswer(e.target.value);
+                if (!answerStartedRef.current && e.target.value.length > 0) {
+                  answerStartedRef.current = true;
+                  answerStartTimeRef.current = Date.now();
+                  trackAnswerInputStarted();
+                }
+              }}
+              onBlur={() => {
+                if (answer.trim() && answerStartTimeRef.current) {
+                  const elapsed = Math.round((Date.now() - answerStartTimeRef.current) / 1000);
+                  trackAnswerInputCompleted(answer.trim().length, elapsed);
+                  answerStartTimeRef.current = null;
+                }
+              }}
               placeholder="직접 써본 글자를 입력하세요"
               maxLength={50}
             />

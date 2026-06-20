@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
+import { trackShareLinkCopied } from "@/lib/analytics";
 import { Page, TopBar } from "@/components/layout";
 
 export default function UploadSuccessPage() {
@@ -14,6 +15,7 @@ export default function UploadSuccessPage() {
     const url = `${window.location.origin}/challenges/${challenge?.id ?? ""}`;
     try {
       await navigator.clipboard.writeText(url);
+      if (challenge) trackShareLinkCopied(challenge.id);
       showToast("링크가 복사됐어요! 🔗");
     } catch {
       showToast("링크 복사에 실패했어요");

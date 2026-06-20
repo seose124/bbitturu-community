@@ -84,6 +84,8 @@ p {
 
 .app-frame {
   position: relative;
+  display: flex;
+  flex-direction: column;
   width: 100%;
   max-width: 480px;
   height: 100%;
@@ -97,7 +99,7 @@ p {
 
 .page {
   width: 100%;
-  height: 100%;
+  flex: 1;
   min-height: 0;
   overflow: hidden;
   background: var(--surface);
@@ -242,6 +244,12 @@ p {
   border-top: 1px solid var(--border);
   background: var(--card);
   box-shadow: 0 -2px 16px rgb(28 28 24 / 5%);
+  transition: transform 280ms ease;
+  will-change: transform;
+}
+
+.bottom-nav-hidden {
+  transform: translateY(100%);
 }
 
 .nav-item {
@@ -1158,31 +1166,12 @@ p {
 .result-next-link {
   align-self: center;
   margin-top: 22px;
-  background: transparent;
-  border: 1px solid #D0F879;
-  border-radius: 999px;
-  color: #D0F879;
-  padding: 10px 18px;
-  cursor: pointer;
-  font-size: 16px;
-  font-weight: 800;
-}
-
-.result-next-link:hover {
-  text-decoration: underline;
-  text-underline-offset: 4px;
 }
 
 .result-combo-note {
-  display: inline-flex;
   align-self: center;
   max-width: 100%;
-  align-items: center;
-  justify-content: center;
-  border: 1px solid #3a3b32;
-  border-radius: 16px;
-  background: #262620;
-  padding: 9px 14px;
+  margin-top: 8px;
   color: #BFBFAE;
   font-size: 12px;
   font-weight: 700;
@@ -1215,7 +1204,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 14px 20px 28px;
+  padding: 20px 20px 36px;
 }
 
 .share-intro {
@@ -1239,7 +1228,7 @@ p {
 .share-card-body {
   display: flex;
   flex-direction: column;
-  padding: 22px;
+  padding: 20px 20px 22px;
 }
 
 .share-brand {
@@ -1276,6 +1265,13 @@ p {
 .share-writing .handwriting {
   color: rgb(238 234 225 / 65%);
   font-size: 24px;
+}
+
+.share-writing-img {
+  width: 100%;
+  max-height: 160px;
+  object-fit: contain;
+  border-radius: 8px;
 }
 
 .share-label {

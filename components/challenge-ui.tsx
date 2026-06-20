@@ -1,7 +1,8 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
+import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
 import { Check, Flame, Upload } from "lucide-react";
 import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
 import { getKstDate } from "@/lib/progression";
@@ -85,11 +86,14 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   const [submitting, setSubmitting] = useState(false);
   const { saveAttempt, showToast } = useBbiduru();
   const router = useRouter();
+  const mountTimeRef = useRef(Date.now());
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
+    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
   };
@@ -138,6 +142,7 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const [submitting, setSubmitting] = useState(false);
   const { attempts, stats, saveAttempt } = useBbiduru();
   const router = useRouter();
+  const mountTimeRef = useRef(Date.now());
   const storedAttempt = attempts[challenge.id];
   const attempt =
     storedAttempt?.isDaily &&
@@ -149,6 +154,8 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
+    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
   };
@@ -156,6 +163,8 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const pass = async () => {
     if (submitting) return;
     setSubmitting(true);
+    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
     await saveAttempt(challenge.id, "", true);
     router.push(`/challenges/${challenge.id}/result`);
   };

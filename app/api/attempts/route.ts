@@ -109,6 +109,7 @@ export async function POST(request: NextRequest) {
   const passed = Boolean(body.passed);
   const similarity = passed ? 0 : answerSimilarity(String(challenge.answer), answer);
   const correct = !passed && similarity > 0.55;
+  const comboWorthy = !passed && similarity >= 0.50;
   const valid =
     !passed &&
     answer.replace(/\s/g, "").length >= 2 &&
@@ -132,7 +133,7 @@ export async function POST(request: NextRequest) {
   const currentStats = statsFromRow(currentStatsRow);
   const { data: recentAttempts } = await admin
     .from("attempts")
-    .select("is_correct, is_pass")
+    .select("is_pass, similarity_score")
     .eq("user_id", user.id)
     .order("created_at", { ascending: false })
     .limit(100);
@@ -140,7 +141,7 @@ export async function POST(request: NextRequest) {
   for (const previousAttempt of recentAttempts ?? []) {
     if (
       previousAttempt.is_pass ||
-      !previousAttempt.is_correct
+      Number(previousAttempt.similarity_score) < 0.50
     ) {
       break;
     }
@@ -151,7 +152,7 @@ export async function POST(request: NextRequest) {
   const nextStats = applyContribution(currentStats, {
     track: "interpreter",
     xp: baseXp,
-    correct,
+    correct: comboWorthy,
     valid,
   });
   const xpEarned = nextStats.interpreterXp - currentStats.interpreterXp;

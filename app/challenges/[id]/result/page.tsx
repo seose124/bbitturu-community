@@ -3,8 +3,9 @@
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { Share2, Users } from "lucide-react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
+import { trackAnswerRevealed, trackCrowdInterestClicked } from "@/lib/analytics";
 import { Page, TopBar } from "@/components/layout";
 import { comboMilestoneMessage } from "@/lib/progression";
 import { answerSimilarity, charMatchRate } from "@/lib/similarity";
@@ -91,6 +92,7 @@ export default function ResultPage() {
   const [progressVisible, setProgressVisible] = useState(false);
   const [liked, setLiked] = useState<number[]>([]);
   const [interestSent, setInterestSent] = useState(false);
+  const revealTrackedRef = useRef(false);
 
   useEffect(() => {
     const timer = window.setTimeout(() => setProgressVisible(true), 120);
@@ -107,6 +109,12 @@ export default function ResultPage() {
       ),
     [attempt, challenge],
   );
+
+  useEffect(() => {
+    if (revealTrackedRef.current || !challenge || !attempt) return;
+    revealTrackedRef.current = true;
+    trackAnswerRevealed(challenge.id, correct, attempt.similarity);
+  }, [challenge, attempt, correct]);
 
   const myRate = useMemo(() => {
     if (!challenge || !attempt || attempt.passed) return 0;
@@ -219,6 +227,7 @@ export default function ResultPage() {
                     className="button button-ghost button-small"
                     disabled={interestSent}
                     onClick={async () => {
+                      trackCrowdInterestClicked(challenge.id);
                       try {
                         await signalInterest(challenge.id);
                         setInterestSent(true);
@@ -262,7 +271,7 @@ export default function ResultPage() {
                 <p className="result-xp-note">판독 참여 +5XP 획득</p>
               ) : null}
               <Link
-                className="button button-primary"
+                className="button button-ghost"
                 href={`/challenges/${challenge.id}/share`}
               >
                 <Share2 size={17} />
@@ -273,7 +282,7 @@ export default function ResultPage() {
 
           {/* 7. 다음 챌린지 도전 */}
           <button
-            className="result-next-link"
+            className="button button-accent result-next-link"
             onClick={() => router.push(`/challenges/${nextChallenge.id}`)}
           >
             다음 챌린지 도전 →

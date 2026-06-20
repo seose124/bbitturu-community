@@ -10,7 +10,7 @@ import {
   HomeChallengeCard,
 } from "@/components/challenge-ui";
 import { HomeDrawer } from "@/components/home-drawer";
-import { BottomNav, Page, TopBar } from "@/components/layout";
+import { Page, TopBar } from "@/components/layout";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
@@ -94,7 +94,6 @@ export default function HomePage() {
             </div>
           </section>
         </div>
-        <BottomNav />
       </div>
       <HomeDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />
     </Page>

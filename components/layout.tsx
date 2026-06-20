@@ -104,9 +104,31 @@ export function TopBar({
 
 export function BottomNav() {
   const pathname = usePathname();
+  const [visible, setVisible] = useState(true);
+
+  useEffect(() => {
+    queueMicrotask(() => setVisible(true));
+    const el = document.querySelector(".scroll-content") as HTMLElement | null;
+    if (!el) return;
+    let last = 0;
+    const onScroll = () => {
+      if (window.innerWidth >= 768) {
+        setVisible(true);
+        return;
+      }
+      const y = el.scrollTop;
+      setVisible(y <= 40 || y < last);
+      last = y;
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => el.removeEventListener("scroll", onScroll);
+  }, [pathname]);
 
   return (
-    <nav className="bottom-nav" aria-label="주요 메뉴">
+    <nav
+      className={`bottom-nav${visible ? "" : " bottom-nav-hidden"}`}
+      aria-label="주요 메뉴"
+    >
       {navItems.map((item) => {
         const active = item.match(pathname);
         return (
@@ -166,6 +188,7 @@ export function AppChrome({ children }: { children: ReactNode }) {
   return (
     <div className="app-frame">
       {children}
+      <BottomNav />
       <FloatingUpload />
     </div>
   );

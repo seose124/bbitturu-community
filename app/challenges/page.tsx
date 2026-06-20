@@ -6,7 +6,7 @@ import {
   ChallengeListItem,
   EmptyChallenge,
 } from "@/components/challenge-ui";
-import { BottomNav, Page, TopBar } from "@/components/layout";
+import { Page, TopBar } from "@/components/layout";
 import type { ChallengeTag } from "@/lib/challenges";
 
 type Filter = "all" | ChallengeTag;
@@ -88,7 +88,6 @@ export default function ChallengesPage() {
             <EmptyChallenge />
           )}
         </div>
-        <BottomNav />
       </div>
     </Page>
   );

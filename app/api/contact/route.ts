@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
+import { createClient } from "@supabase/supabase-js";
 
 export async function POST(req: NextRequest) {
   const { name, email, type, content } = await req.json();
@@ -10,25 +11,24 @@ export async function POST(req: NextRequest) {
     );
   }
 
-  const accessKey = process.env.WEB3FORMS_KEY;
-  if (!accessKey) {
+  const supabaseUrl = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  if (!supabaseUrl || !serviceKey) {
     return NextResponse.json({ error: "서버 설정 오류" }, { status: 500 });
   }
 
-  const res = await fetch("https://api.web3forms.com/submit", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({
-      access_key: accessKey,
-      subject: `[삐뚜루 문의] ${type}`,
-      from_name: name || "익명",
-      reply_to: email || "",
-      message: `이름: ${name || "미입력"}\n이메일: ${email || "미입력"}\n문의유형: ${type}\n\n${content}`,
-    }),
+  const admin = createClient(supabaseUrl, serviceKey, {
+    auth: { persistSession: false, autoRefreshToken: false },
   });
 
-  const data = await res.json();
-  if (!data.success) {
+  const { error } = await admin.from("contact_messages").insert({
+    name: name?.trim() || null,
+    email: email?.trim() || null,
+    type: type || "기타",
+    content: content.trim(),
+  });
+
+  if (error) {
     return NextResponse.json({ error: "전송 실패" }, { status: 500 });
   }
 

@@ -13,6 +13,7 @@ import {
 } from "react";
 import type { User } from "@supabase/supabase-js";
 import { createClient } from "@/lib/supabase";
+import { initAnalytics, identifyUser } from "@/lib/analytics";
 import { answerSimilarity } from "@/lib/similarity";
 import { type Challenge, type Difficulty } from "@/lib/challenges";
 import {
@@ -230,6 +231,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const isAnonymous = Boolean(user?.is_anonymous);
 
   useEffect(() => {
+    initAnalytics(undefined);
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!session) {
         supabase.auth.signInAnonymously().then(({ data, error }) => {
@@ -237,15 +239,18 @@ export function AppProvider({ children }: { children: ReactNode }) {
             console.error("[bbiduru] 익명 로그인 실패:", error.message);
             return;
           }
+          if (data.user) identifyUser(data.user.id);
           setUser(data.user);
         });
       } else {
+        identifyUser(session.user.id);
         setUser(session.user);
       }
     });
     const {
       data: { subscription },
     } = supabase.auth.onAuthStateChange((_, session) => {
+      if (session?.user) identifyUser(session.user.id);
       setUser(session?.user ?? null);
     });
     return () => subscription.unsubscribe();

@@ -11,7 +11,7 @@ import {
   Upload,
 } from "lucide-react";
 import { useBbiduru } from "@/components/app-provider";
-import { BottomNav, Page, TopBar } from "@/components/layout";
+import { Page, TopBar } from "@/components/layout";
 import { getLevel, type ProgressTrack } from "@/lib/progression";
 import { answerSimilarity } from "@/lib/similarity";
 
@@ -196,7 +196,6 @@ export default function ProfilePage() {
             </button>
           </section>
         </div>
-        <BottomNav />
       </div>
     </Page>
   );

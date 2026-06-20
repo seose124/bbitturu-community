@@ -10,13 +10,16 @@ import {
 } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import { useBbiduru } from "@/components/app-provider";
+import { trackResultShared } from "@/lib/analytics";
 import { Page, TopBar } from "@/components/layout";
 
 export default function SharePage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { challenges, getChallenge, showToast } = useBbiduru();
+  const { challenges, attempts, getChallenge, showToast } = useBbiduru();
   const challenge = getChallenge(Number(params.id));
+  const attempt = challenge ? attempts[challenge.id] : undefined;
+  const isCorrect = Boolean(attempt && !attempt.passed && attempt.correct);
 
   if (!challenge) {
     return (
@@ -38,6 +41,7 @@ export default function SharePage() {
   const copyLink = async () => {
     try {
       await navigator.clipboard.writeText(shareUrl);
+      trackResultShared(challenge.id, "link_copy", isCorrect);
       showToast("링크를 복사했어요");
     } catch {
       showToast("링크 복사에 실패했어요");
@@ -52,6 +56,7 @@ export default function SharePage() {
           text: `${challenge.successRate}%만 판독한 악필에 도전해보세요.`,
           url: shareUrl,
         });
+        trackResultShared(challenge.id, "native_share", isCorrect);
         return;
       } catch {
         return;
@@ -82,9 +87,17 @@ export default function SharePage() {
               <strong className="share-rate">{challenge.successRate}%</strong>
               <p>만 판독에 성공했어요</p>
               <div className="share-writing">
-                <span className="handwriting">
-                  {challenge.handwriting.replace(/\n/g, " ")}
-                </span>
+                {challenge.imageData ? (
+                  <img
+                    src={challenge.imageData}
+                    alt="악필 이미지"
+                    className="share-writing-img"
+                  />
+                ) : (
+                  <span className="handwriting">
+                    {challenge.handwriting.replace(/\n/g, " ")}
+                  </span>
+                )}
               </div>
               <span className="share-label">실제 정답</span>
               <strong className="share-answer">
@@ -99,14 +112,20 @@ export default function SharePage() {
           <div className="share-options">
             <button
               className="share-option kakao"
-              onClick={() => showToast("카카오톡 공유를 준비하고 있어요")}
+              onClick={() => {
+                trackResultShared(challenge.id, "kakao", isCorrect);
+                showToast("카카오톡 공유를 준비하고 있어요");
+              }}
             >
               <MessageCircle size={23} fill="currentColor" />
               <span>카카오톡</span>
             </button>
             <button
               className="share-option instagram"
-              onClick={() => showToast("인스타그램 공유를 준비하고 있어요")}
+              onClick={() => {
+                trackResultShared(challenge.id, "instagram", isCorrect);
+                showToast("인스타그램 공유를 준비하고 있어요");
+              }}
             >
               <Camera size={23} />
               <span>인스타</span>

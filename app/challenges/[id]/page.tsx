@@ -1,8 +1,13 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useRef, useState } from "react";
 import { Flame, Lightbulb, Trash2 } from "lucide-react";
+import {
+  trackChallengeClicked,
+  trackChallengeSubmitted,
+  trackChallengePassed,
+} from "@/lib/analytics";
 import { useBbiduru } from "@/components/app-provider";
 import { DifficultyBadge } from "@/components/challenge-ui";
 import { Page, TopBar } from "@/components/layout";
@@ -24,6 +29,20 @@ export default function ChallengePage() {
   const [answer, setAnswer] = useState("");
   const [deleting, setDeleting] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const mountTimeRef = useRef(Date.now());
+  const clickTrackedRef = useRef(false);
+
+  useEffect(() => {
+    if (clickTrackedRef.current || !challenge) return;
+    clickTrackedRef.current = true;
+    const referrer = document.referrer;
+    const entrySource = !referrer
+      ? "direct_url"
+      : referrer.includes(window.location.origin)
+        ? "feed"
+        : "share_link";
+    trackChallengeClicked(challenge.id, entrySource);
+  }, [challenge]);
 
   if (!challenge) {
     return (
@@ -52,6 +71,8 @@ export default function ChallengePage() {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
+    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
     await saveAttempt(challenge.id, answer.trim());
     router.push(`/challenges/${challenge.id}/result`);
   };
@@ -59,6 +80,8 @@ export default function ChallengePage() {
   const pass = async () => {
     if (submitting) return;
     setSubmitting(true);
+    const timeSpent = Math.round((Date.now() - mountTimeRef.current) / 1000);
+    trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
     await saveAttempt(challenge.id, "", true);
     router.push(`/challenges/${challenge.id}/result`);
   };
