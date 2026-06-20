@@ -62,65 +62,69 @@ export default function ContactPage() {
     <Page>
       <div className="page-column">
         <TopBar title="관리자 문의" backHref="/" />
-        <form className="scroll-content contact-content" onSubmit={submit}>
-          <div>
-            <h1 className="page-heading">관리자에게 문의하기</h1>
-            <p className="page-subtitle">
-              서비스 의견, 오류 신고, 부적절한 게시물 신고 등 무엇이든 남겨주세요!<br />
-              답변이 필요하면 이메일도 함께 적어주세요.
-            </p>
-          </div>
-          <label className="field">
-            <span>이름 / 닉네임</span>
-            <input
-              className="input"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              placeholder="익명의 판독러"
-              maxLength={50}
-            />
-          </label>
-          <label className="field">
-            <span>이메일 <span style={{ opacity: 0.6, fontWeight: 400 }}>(선택)</span></span>
-            <input
-              className="input"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="답변이 필요하면 입력해 주세요"
-            />
-          </label>
-          <fieldset className="field fieldset">
-            <legend>문의 유형</legend>
-            <div className="difficulty-picker">
-              {contactTypes.map((item) => (
-                <button
-                  className={`filter-chip ${type === item ? "active" : ""}`}
-                  type="button"
-                  key={item}
-                  onClick={() => setType(item)}
-                >
-                  {item}
-                </button>
-              ))}
+        <form className="page-column contact-form" onSubmit={submit}>
+          <div className="scroll-content contact-content">
+            <div>
+              <h1 className="page-heading">관리자에게 문의하기</h1>
+              <p className="page-subtitle">
+                서비스 의견, 오류 신고, 부적절한 게시물 신고 등 무엇이든 남겨주세요!<br />
+                답변이 필요하면 이메일도 함께 적어주세요.
+              </p>
             </div>
-          </fieldset>
-          <label className="field">
-            <span>문의 내용 *</span>
-            <div className="textarea-wrap">
-              <textarea
-                className="input textarea contact-textarea"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="자유롭게 의견을 남겨주세요"
-                maxLength={2000}
+            <label className="field">
+              <span>이름 / 닉네임</span>
+              <input
+                className="input"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                placeholder="익명의 판독러"
+                maxLength={50}
               />
-              <small>{content.length}/2000</small>
-            </div>
-          </label>
-          <button className="button button-primary" type="submit" disabled={sending}>
-            {sending ? "전송 중..." : "문의 보내기"}
-          </button>
+            </label>
+            <label className="field">
+              <span>이메일 <span style={{ opacity: 0.6, fontWeight: 400 }}>(선택)</span></span>
+              <input
+                className="input"
+                type="email"
+                value={email}
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="답변이 필요하면 입력해 주세요"
+              />
+            </label>
+            <fieldset className="field fieldset">
+              <legend>문의 유형</legend>
+              <div className="difficulty-picker">
+                {contactTypes.map((item) => (
+                  <button
+                    className={`filter-chip ${type === item ? "active" : ""}`}
+                    type="button"
+                    key={item}
+                    onClick={() => setType(item)}
+                  >
+                    {item}
+                  </button>
+                ))}
+              </div>
+            </fieldset>
+            <label className="field">
+              <span>문의 내용 *</span>
+              <div className="textarea-wrap">
+                <textarea
+                  className="input textarea contact-textarea"
+                  value={content}
+                  onChange={(e) => setContent(e.target.value)}
+                  placeholder="자유롭게 의견을 남겨주세요"
+                  maxLength={2000}
+                />
+                <small>{content.length}/2000</small>
+              </div>
+            </label>
+          </div>
+          <div className="contact-submit-bar">
+            <button className="button button-primary" type="submit" disabled={sending}>
+              {sending ? "전송 중..." : "문의 보내기"}
+            </button>
+          </div>
         </form>
       </div>
     </Page>
