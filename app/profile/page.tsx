@@ -160,10 +160,10 @@ export default function ProfilePage() {
                   <em className="stats-new">새 결과 {unreadReportCount}</em>
                 ) : null}
               </Link>
-              <div>
+              <Link className="stats-link" href="/profile/attempts">
                 <strong>{attemptCount}</strong>
-                <span>판독 시도</span>
-              </div>
+                <span>판독한 챌린지</span>
+              </Link>
               <div>
                 <strong>{successRate === null ? "—" : `${successRate}%`}</strong>
                 <span>판독 성공률</span>

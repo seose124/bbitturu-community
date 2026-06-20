@@ -3039,12 +3039,14 @@ p {
 
 .notification-content,
 .uploads-content,
+.attempts-content,
 .report-content {
   padding: 20px;
 }
 
 .notification-list,
-.upload-report-list {
+.upload-report-list,
+.attempt-list {
   display: flex;
   flex-direction: column;
   gap: 10px;
@@ -3133,6 +3135,19 @@ p {
 .upload-report-info {
   min-width: 0;
   padding: 14px 46px 14px 14px;
+}
+
+.attempt-report-info {
+  padding-right: 14px;
+}
+
+.attempt-answer {
+  overflow: hidden;
+  margin-top: 5px;
+  color: var(--ink-sub);
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .upload-report-delete {
