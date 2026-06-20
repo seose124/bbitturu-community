@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
-import { Check, Flame, Upload } from "lucide-react";
+import { Check, Upload } from "lucide-react";
 import { difficultyClass, type Challenge, type Difficulty } from "@/lib/challenges";
 import { getKstDate } from "@/lib/progression";
 import { useBbiduru } from "@/components/app-provider";
@@ -146,7 +146,13 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
   );
 }
 
-export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
+const DAILY_PROMPTS = [
+  "이 글씨, 정말 사람이 쓴 걸까요?",
+  "판독단이라면 읽어낼 수 있어요!",
+  "오늘의 미제, 해결할 수 있는 건 당신뿐",
+];
+
+export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challenge; index?: number }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const { attempts, stats, saveAttempt } = useBbiduru();
@@ -212,7 +218,7 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
         </div>
       ) : (
         <form className="home-answer" onSubmit={submit}>
-          <h3>이 글씨, 정말 사람이 쓴 걸까요?</h3>
+          <h3>{DAILY_PROMPTS[index % DAILY_PROMPTS.length]}</h3>
           <input
             className="input"
             value={answer}
@@ -237,7 +243,6 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
               {submitting ? "판독 중..." : "미제 풀기"}
             </button>
           </div>
-          <span className="daily-case-reward"><Flame size={13} /> 참여하면 판독단 +3 XP</span>
         </form>
       )}
     </article>
@@ -275,9 +280,9 @@ export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) 
           className="daily-carousel-track"
           style={{ transform: `translateX(-${activeIndex * 100}%)` }}
         >
-          {challenges.map((c) => (
+          {challenges.map((c, i) => (
             <div className="daily-carousel-slide" key={c.id}>
-              <DailyChallengeCard challenge={c} />
+              <DailyChallengeCard challenge={c} index={i} />
             </div>
           ))}
         </div>
@@ -296,8 +301,8 @@ export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) 
       </div>
       {/* desktop: 3-column grid */}
       <div className="daily-cases-grid">
-        {challenges.map((c) => (
-          <DailyChallengeCard challenge={c} key={c.id} />
+        {challenges.map((c, i) => (
+          <DailyChallengeCard challenge={c} index={i} key={c.id} />
         ))}
       </div>
     </div>

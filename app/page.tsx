@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { Menu } from "lucide-react";
+import { Flame, Menu } from "lucide-react";
 import { useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import {
@@ -59,6 +59,7 @@ export default function HomePage() {
                 오늘 {dailyProgress}/3 기여 · 연속 {stats.activityStreak}일
               </span>
             </div>
+            <p className="daily-xp-notice"><Flame size={12} /> 참여하면 판독단 +3 XP</p>
             {dailyChallenges.length > 0 ? (
               <DailyCasesCarousel challenges={dailyChallenges} />
             ) : (
