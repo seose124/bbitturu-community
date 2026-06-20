@@ -354,29 +354,17 @@ export function AppProvider({ children }: { children: ReactNode }) {
     const selected = dailyChallengeId
       ? challenges.find((challenge) => challenge.id === dailyChallengeId)
       : undefined;
-    if (
-      selected &&
-      selected.authorId !== user?.id &&
-      (!attempts[selected.id] || isTodayDailyAttempt(attempts[selected.id]))
-    ) {
-      return selected;
-    }
+    if (selected) return selected;
     if (!challenges.length) return undefined;
-    const available = challenges.filter(
-      (challenge) =>
-        challenge.authorId !== user?.id &&
-        (!attempts[challenge.id] || isTodayDailyAttempt(attempts[challenge.id])),
-    );
-    if (!available.length) return undefined;
-    const preferred = available.filter(
+    const preferred = challenges.filter(
       (challenge) => challenge.tries >= 3 && challenge.successRate < 35,
     );
-    const candidates = preferred.length ? preferred : available;
+    const candidates = preferred.length ? preferred : challenges;
     const dayNumber = Math.floor(
       new Date(`${getKstDate()}T00:00:00+09:00`).getTime() / 86_400_000,
     );
     return candidates[Math.abs(dayNumber) % candidates.length];
-  }, [attempts, challenges, dailyChallengeId, user?.id]);
+  }, [challenges, dailyChallengeId]);
 
   const dailyProgress =
     stats.dailyActivityDate === getKstDate()
@@ -498,9 +486,12 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const saveAttempt = useCallback(
     async (id: number, answer: string, passed = false) => {
       const existing = attempts[id];
-      if (existing) return existing;
       const challenge = challenges.find((item) => item.id === id);
       if (!challenge) throw new Error("챌린지를 찾을 수 없어요");
+      const isDaily = dailyChallenge?.id === id;
+      if (existing && (!isDaily || isTodayDailyAttempt(existing))) {
+        return existing;
+      }
 
       const cleanAnswer = answer.trim();
       const similarity = passed ? 0 : answerSimilarity(challenge.answer, cleanAnswer);
@@ -509,7 +500,6 @@ export function AppProvider({ children }: { children: ReactNode }) {
         !passed &&
         cleanAnswer.replace(/\s/g, "").length >= 2 &&
         challenge.authorId !== user?.id;
-      const isDaily = dailyChallenge?.id === id;
       const baseXp = valid
         ? 5 + (correct ? 8 : 0) + (correct && challenge.successRate < 30 ? 5 : 0) + (isDaily ? 3 : 0)
         : 0;

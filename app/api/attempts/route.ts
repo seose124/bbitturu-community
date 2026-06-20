@@ -83,12 +83,18 @@ export async function POST(request: NextRequest) {
     .eq("challenge_id", challengeId)
     .eq("user_id", user.id)
     .maybeSingle();
+  const today = getKstDate();
+  const repeatDaily = Boolean(
+    existing &&
+      body.isDaily &&
+      getKstDate(new Date(existing.created_at)) !== today,
+  );
   const { data: currentStatsRow } = await admin
     .from("user_stats")
     .select("*")
     .eq("user_id", user.id)
     .maybeSingle();
-  if (existing) {
+  if (existing && !repeatDaily) {
     return NextResponse.json({
       attempt: existing,
       stats: currentStatsRow,
@@ -107,7 +113,6 @@ export async function POST(request: NextRequest) {
     !passed &&
     answer.replace(/\s/g, "").length >= 2 &&
     challenge.author_id !== user.id;
-  const today = getKstDate();
   const { data: dailyCase } = await admin
     .from("daily_cases")
     .select("challenge_id")
@@ -160,21 +165,24 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: statsError.message }, { status: 500 });
   }
 
-  const { data: attempt, error: attemptError } = await admin
-    .from("attempts")
-    .insert({
-      challenge_id: challengeId,
-      user_id: user.id,
-      answer_raw: answer,
-      answer_normalized: answer.replace(/\s/g, "").toLowerCase(),
-      is_correct: correct,
-      is_pass: passed,
-      is_valid: valid,
-      is_daily_case: isDaily,
-      similarity_score: similarity,
-      xp_earned: xpEarned,
-      combo_after: nextStats.currentCombo,
-    })
+  const attemptValues = {
+    challenge_id: challengeId,
+    user_id: user.id,
+    answer_raw: answer,
+    answer_normalized: answer.replace(/\s/g, "").toLowerCase(),
+    is_correct: correct,
+    is_pass: passed,
+    is_valid: valid,
+    is_daily_case: isDaily,
+    similarity_score: similarity,
+    xp_earned: xpEarned,
+    combo_after: nextStats.currentCombo,
+    created_at: new Date().toISOString(),
+  };
+  const attemptQuery = repeatDaily
+    ? admin.from("attempts").update(attemptValues).eq("id", existing.id)
+    : admin.from("attempts").insert(attemptValues);
+  const { data: attempt, error: attemptError } = await attemptQuery
     .select("*")
     .single();
   if (attemptError || !attempt) {

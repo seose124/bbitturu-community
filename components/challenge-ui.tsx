@@ -136,7 +136,7 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
 export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
   const [answer, setAnswer] = useState("");
   const [submitting, setSubmitting] = useState(false);
-  const { user, attempts, stats, saveAttempt } = useBbiduru();
+  const { attempts, stats, saveAttempt } = useBbiduru();
   const router = useRouter();
   const storedAttempt = attempts[challenge.id];
   const attempt =
@@ -144,7 +144,6 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
     getKstDate(new Date(storedAttempt.createdAt)) === getKstDate()
       ? storedAttempt
       : undefined;
-  const isOwner = Boolean(user && challenge.authorId === user.id);
 
   const submit = async (event: FormEvent) => {
     event.preventDefault();
@@ -177,15 +176,7 @@ export function DailyChallengeCard({ challenge }: { challenge: Challenge }) {
         )}
       </div>
 
-      {isOwner ? (
-        <div className="daily-case-state">
-          <strong>내 글씨가 오늘의 미제로 선정됐어요</strong>
-          <p>판독단의 반응이 모이는 중이에요.</p>
-          <Link className="button button-green button-small" href={`/profile/uploads/${challenge.id}`}>
-            판독 현황 보기
-          </Link>
-        </div>
-      ) : attempt ? (
+      {attempt ? (
         <div className="daily-case-state">
           <span className="daily-case-complete"><Check size={18} /> 오늘의 미제 참여 완료</span>
           <strong>{attempt.correct ? "미제를 해결했어요" : "정답을 확인했어요"}</strong>
