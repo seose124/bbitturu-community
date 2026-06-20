@@ -163,9 +163,10 @@ function dbToStats(row: Record<string, any>): UserStats {
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function dbToAttempt(row: Record<string, any>): Attempt {
+  // Support both new schema (answer_raw/is_pass) and old schema (answer/passed)
   return {
-    answer: row.answer_raw ?? "",
-    passed: Boolean(row.is_pass),
+    answer: row.answer_raw ?? row.answer ?? "",
+    passed: Boolean(row.is_pass ?? row.passed),
     correct: Boolean(row.is_correct),
     similarity: Number(row.similarity_score ?? 0),
     xpEarned: Number(row.xp_earned ?? 0),
@@ -179,6 +180,7 @@ function deriveCurrentCombo(
   rows: Array<{
     user_id?: string;
     is_pass?: boolean;
+    passed?: boolean;
     is_correct?: boolean;
   }>,
   userId: string,
@@ -186,7 +188,7 @@ function deriveCurrentCombo(
   let combo = 0;
   for (const row of rows) {
     if (row.user_id !== userId) continue;
-    if (row.is_pass || !row.is_correct) break;
+    if ((row.is_pass ?? row.passed) || !row.is_correct) break;
     combo += 1;
   }
   return combo;
@@ -203,8 +205,8 @@ function dbToReportAttempt(row: Record<string, any>): ReportAttempt {
   return {
     challengeId: Number(row.challenge_id),
     userId: row.user_id ?? undefined,
-    answer: row.answer_raw ?? "",
-    passed: Boolean(row.is_pass),
+    answer: row.answer_raw ?? row.answer ?? "",
+    passed: Boolean(row.is_pass ?? row.passed),
     correct: Boolean(row.is_correct),
     createdAt: row.created_at ?? new Date().toISOString(),
   };

@@ -2008,9 +2008,6 @@ p {
   font-size: 24px;
 }
 
-.stats-grid > div:nth-child(2) strong {
-  color: var(--ink);
-}
 
 .stats-grid span {
   margin-top: 2px;

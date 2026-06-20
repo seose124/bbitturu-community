@@ -151,7 +151,7 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
 }
 
 const DAILY_PROMPTS = [
-  "이 글씨, 정말 사람이 쓴 걸까요?",
+  "이 악필, 과연 읽어낼 수 있을까요?",
   "판독단이라면 읽어낼 수 있어요!",
   "오늘의 미제, 해결할 수 있는 건 당신뿐",
 ];

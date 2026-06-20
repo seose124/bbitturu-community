@@ -1,40 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { createClient } from "@supabase/supabase-js";
-import { applyContribution, defaultUserStats, getKstDate } from "@/lib/progression";
 import { answerSimilarity } from "@/lib/similarity";
-
-function statsFromRow(row: Record<string, unknown> | null) {
-  if (!row) return defaultUserStats;
-  return {
-    interpreterXp: Number(row.interpreter_xp ?? 0),
-    uploaderXp: Number(row.uploader_xp ?? 0),
-    activityStreak: Number(row.activity_streak ?? 0),
-    lastContributionDate: String(row.last_contribution_date ?? "") || null,
-    dailyValidActivityCount: Number(row.daily_valid_activity_count ?? 0),
-    dailyActivityDate: String(row.daily_activity_date ?? "") || null,
-    dailyBonusDate: String(row.daily_bonus_date ?? "") || null,
-    currentCombo: Number(row.current_combo ?? 0),
-    maxCombo: Number(row.max_combo ?? 0),
-    comboDate: String(row.combo_date ?? "") || null,
-  };
-}
-
-function statsToRow(userId: string, stats: typeof defaultUserStats) {
-  return {
-    user_id: userId,
-    interpreter_xp: stats.interpreterXp,
-    uploader_xp: stats.uploaderXp,
-    activity_streak: stats.activityStreak,
-    last_contribution_date: stats.lastContributionDate,
-    daily_valid_activity_count: stats.dailyValidActivityCount,
-    daily_activity_date: stats.dailyActivityDate,
-    daily_bonus_date: stats.dailyBonusDate,
-    current_combo: stats.currentCombo,
-    max_combo: stats.maxCombo,
-    combo_date: stats.comboDate,
-    updated_at: new Date().toISOString(),
-  };
-}
 
 export async function POST(request: NextRequest) {
   const serviceKey = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -51,8 +17,9 @@ export async function POST(request: NextRequest) {
   const admin = createClient(supabaseUrl, serviceKey, {
     auth: { persistSession: false, autoRefreshToken: false },
   });
+
   const { data: userData, error: userError } = await admin.auth.getUser(accessToken);
-  const user = userData.user;
+  const user = userData?.user;
   if (userError || !user) {
     return NextResponse.json({ error: "인증이 만료됐어요" }, { status: 401 });
   }
@@ -64,10 +31,31 @@ export async function POST(request: NextRequest) {
     isDaily?: boolean;
   };
   const challengeId = Number(body.challengeId);
-  if (!Number.isInteger(challengeId)) {
+  if (!Number.isInteger(challengeId) || challengeId <= 0) {
     return NextResponse.json({ error: "잘못된 챌린지예요" }, { status: 400 });
   }
 
+  // Try the full RPC path first (requires migration to be applied)
+  try {
+    const userClient = createClient(supabaseUrl, process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!, {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    });
+    const { data: rpcData, error: rpcError } = await userClient.rpc("submit_attempt", {
+      p_challenge_id: challengeId,
+      p_answer: String(body.answer ?? "").trim(),
+      p_is_pass: Boolean(body.passed),
+      p_is_daily: Boolean(body.isDaily),
+    });
+    if (!rpcError && rpcData) {
+      return NextResponse.json(rpcData);
+    }
+    // RPC not available (migration not applied) — fall through to legacy path
+  } catch {
+    // continue to legacy path
+  }
+
+  // --- Legacy path: works with the pre-migration schema ---
   const { data: challenge, error: challengeError } = await admin
     .from("challenges")
     .select("id, answer, author_id, success_rate, tries")
@@ -77,31 +65,19 @@ export async function POST(request: NextRequest) {
     return NextResponse.json({ error: "챌린지를 찾을 수 없어요" }, { status: 404 });
   }
 
+  // Check existing attempt (column name varies by schema)
   const { data: existing } = await admin
     .from("attempts")
     .select("*")
     .eq("challenge_id", challengeId)
     .eq("user_id", user.id)
     .maybeSingle();
-  const today = getKstDate();
-  const repeatDaily = Boolean(
-    existing &&
-      body.isDaily &&
-      getKstDate(new Date(existing.created_at)) !== today,
-  );
-  const { data: currentStatsRow } = await admin
-    .from("user_stats")
-    .select("*")
-    .eq("user_id", user.id)
-    .maybeSingle();
-  if (existing && !repeatDaily) {
+
+  if (existing) {
     return NextResponse.json({
       attempt: existing,
-      stats: currentStatsRow,
-      challenge_stats: {
-        tries: challenge.tries,
-        success_rate: challenge.success_rate,
-      },
+      stats: null,
+      challenge_stats: { tries: challenge.tries, success_rate: challenge.success_rate },
     });
   }
 
@@ -109,83 +85,32 @@ export async function POST(request: NextRequest) {
   const passed = Boolean(body.passed);
   const similarity = passed ? 0 : answerSimilarity(String(challenge.answer), answer);
   const correct = !passed && similarity > 0.55;
-  const comboWorthy = !passed && similarity >= 0.50;
   const valid =
     !passed &&
     answer.replace(/\s/g, "").length >= 2 &&
     challenge.author_id !== user.id;
-  const { data: dailyCase } = await admin
-    .from("daily_cases")
-    .select("challenge_id")
-    .eq("case_date", today)
-    .eq("status", "active")
-    .maybeSingle();
-  const isDaily =
-    valid &&
-    (Number(dailyCase?.challenge_id) === challengeId ||
-      (!dailyCase && Boolean(body.isDaily)));
-  const baseXp = valid
-    ? 5 +
-      (correct ? 8 : 0) +
-      (correct && Number(challenge.success_rate) < 30 ? 5 : 0) +
-      (isDaily ? 3 : 0)
-    : 0;
-  const currentStats = statsFromRow(currentStatsRow);
-  const { data: recentAttempts } = await admin
+
+  // Insert using the user's own token so the authenticated role can use the sequence
+  const userInsertClient = createClient(
+    supabaseUrl,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    {
+      auth: { persistSession: false, autoRefreshToken: false },
+      global: { headers: { Authorization: `Bearer ${accessToken}` } },
+    },
+  );
+  const { data: attempt, error: attemptError } = await userInsertClient
     .from("attempts")
-    .select("is_pass, similarity_score")
-    .eq("user_id", user.id)
-    .order("created_at", { ascending: false })
-    .limit(100);
-  let derivedCombo = 0;
-  for (const previousAttempt of recentAttempts ?? []) {
-    if (
-      previousAttempt.is_pass ||
-      Number(previousAttempt.similarity_score) < 0.50
-    ) {
-      break;
-    }
-    derivedCombo += 1;
-  }
-  currentStats.currentCombo = derivedCombo;
-  currentStats.maxCombo = Math.max(currentStats.maxCombo, derivedCombo);
-  const nextStats = applyContribution(currentStats, {
-    track: "interpreter",
-    xp: baseXp,
-    correct: comboWorthy,
-    valid,
-  });
-  const xpEarned = nextStats.interpreterXp - currentStats.interpreterXp;
-
-  const { data: savedStats, error: statsError } = await admin
-    .from("user_stats")
-    .upsert(statsToRow(user.id, nextStats), { onConflict: "user_id" })
+    .insert({
+      challenge_id: challengeId,
+      user_id: user.id,
+      answer,
+      passed,
+      created_at: new Date().toISOString(),
+    })
     .select("*")
     .single();
-  if (statsError) {
-    return NextResponse.json({ error: statsError.message }, { status: 500 });
-  }
 
-  const attemptValues = {
-    challenge_id: challengeId,
-    user_id: user.id,
-    answer_raw: answer,
-    answer_normalized: answer.replace(/\s/g, "").toLowerCase(),
-    is_correct: correct,
-    is_pass: passed,
-    is_valid: valid,
-    is_daily_case: isDaily,
-    similarity_score: similarity,
-    xp_earned: xpEarned,
-    combo_after: nextStats.currentCombo,
-    created_at: new Date().toISOString(),
-  };
-  const attemptQuery = repeatDaily
-    ? admin.from("attempts").update(attemptValues).eq("id", existing.id)
-    : admin.from("attempts").insert(attemptValues);
-  const { data: attempt, error: attemptError } = await attemptQuery
-    .select("*")
-    .single();
   if (attemptError || !attempt) {
     return NextResponse.json(
       { error: attemptError?.message ?? "판독 저장에 실패했어요" },
@@ -193,35 +118,56 @@ export async function POST(request: NextRequest) {
     );
   }
 
+  // Update challenge tries/success_rate
   let tries = Number(challenge.tries ?? 0);
   let successRate = Number(challenge.success_rate ?? 0);
+
   if (valid) {
-    const [validResult, correctResult] = await Promise.all([
-      admin
-        .from("attempts")
-        .select("id", { head: true, count: "exact" })
-        .eq("challenge_id", challengeId)
-        .eq("is_valid", true)
-        .eq("is_pass", false),
-      admin
-        .from("attempts")
-        .select("id", { head: true, count: "exact" })
-        .eq("challenge_id", challengeId)
-        .eq("is_valid", true)
-        .eq("is_pass", false)
-        .eq("is_correct", true),
-    ]);
-    tries = validResult.count ?? 0;
-    successRate = tries ? Math.round(((correctResult.count ?? 0) / tries) * 100) : 0;
+    // Count all non-passed attempts for this challenge
+    const { count: validCount } = await admin
+      .from("attempts")
+      .select("id", { head: true, count: "exact" })
+      .eq("challenge_id", challengeId)
+      .eq("passed", false);
+
+    // Fetch answers to compute success rate
+    const { data: allAttempts } = await admin
+      .from("attempts")
+      .select("answer, user_id")
+      .eq("challenge_id", challengeId)
+      .eq("passed", false);
+
+    tries = validCount ?? 0;
+
+    if (allAttempts && allAttempts.length > 0) {
+      const correctCount = allAttempts.filter(
+        (a) => answerSimilarity(String(challenge.answer), String(a.answer)) > 0.55,
+      ).length;
+      successRate = tries > 0 ? Math.round((correctCount / tries) * 100) : 0;
+    }
+
     await admin
       .from("challenges")
       .update({ tries, success_rate: successRate })
       .eq("id", challengeId);
   }
 
+  // Map to expected response shape (shimming missing fields)
+  const attemptShim = {
+    ...attempt,
+    answer_raw: attempt.answer ?? answer,
+    is_pass: attempt.passed ?? passed,
+    is_correct: correct,
+    is_valid: valid,
+    is_daily_case: false,
+    similarity_score: similarity,
+    xp_earned: 0,
+    combo_after: 0,
+  };
+
   return NextResponse.json({
-    attempt,
-    stats: savedStats,
+    attempt: attemptShim,
+    stats: null,
     challenge_stats: { tries, success_rate: successRate },
   });
 }
