@@ -1845,6 +1845,7 @@ p {
 }
 
 .explore-card-image {
+  position: relative;
   display: flex;
   height: 158px;
   align-items: center;

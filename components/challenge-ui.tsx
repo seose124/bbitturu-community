@@ -54,6 +54,11 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
         ) : (
           <span className="handwriting">{challenge.handwriting}</span>
         )}
+        {completed ? (
+          <div className="writing-complete-overlay" aria-hidden="true">
+            <img src="/icons/icon-challenge-complete.png" alt="" />
+          </div>
+        ) : null}
       </div>
       <div className="explore-card-info">
         <div className="explore-card-summary">
