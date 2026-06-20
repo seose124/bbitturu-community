@@ -152,7 +152,7 @@ export default function ProfilePage() {
             <div className="stats-grid">
               <Link className="stats-link" href="/profile/uploads">
                 <strong>{uploaded}</strong>
-                <span>업로드 챌린지</span>
+                <span>업로드한 챌린지</span>
                 {unreadReportCount ? (
                   <em className="stats-new">새 결과 {unreadReportCount}</em>
                 ) : null}
@@ -176,8 +176,8 @@ export default function ProfilePage() {
 
           <section className="card outlined profile-menu">
             <Link href="/profile/uploads">
-              <img src="/icons/icon-upload.svg" width={18} height={18} alt="" />
-              <span>업로드 챌린지</span>
+              <img src="/icons/icon-folder.svg" width={18} height={18} alt="" />
+              <span>업로드한 챌린지</span>
               {unreadReportCount ? <b>{unreadReportCount}</b> : null}
               <ChevronRight size={16} />
             </Link>

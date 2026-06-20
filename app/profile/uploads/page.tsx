@@ -50,7 +50,7 @@ export default function UploadsPage() {
   return (
     <Page>
       <div className="page-column">
-        <TopBar title="업로드 챌린지" backHref="/profile" />
+        <TopBar title="업로드한 챌린지" backHref="/profile" />
         <div className="scroll-content uploads-content">
           {uploads.length ? (
             <div className="upload-report-list">
