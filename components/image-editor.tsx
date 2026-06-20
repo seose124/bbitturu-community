@@ -19,6 +19,8 @@ import {
 
 const OUTPUT_WIDTH = 800;
 const OUTPUT_HEIGHT = 600;
+const MIN_ZOOM = 1;
+const MAX_ZOOM = 3;
 
 type Point = { x: number; y: number };
 type Stroke = { points: Point[]; size: number };
@@ -51,6 +53,41 @@ function drawStrokeMask(context: CanvasRenderingContext2D, stroke: Stroke) {
   context.restore();
 }
 
+// CanvasRenderingContext2D.filter is undefined in Safari < 18 — use scale-down fallback
+function createBlurredCanvas(
+  image: HTMLImageElement,
+  width: number,
+  height: number,
+): HTMLCanvasElement {
+  const canvas = document.createElement("canvas");
+  canvas.width = width;
+  canvas.height = height;
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return canvas;
+
+  if (typeof ctx.filter === "string") {
+    ctx.filter = "blur(18px)";
+    ctx.drawImage(image, 0, 0, width, height);
+    ctx.filter = "none";
+    return canvas;
+  }
+
+  // Fallback: scale way down then back up — bilinear interpolation creates blur
+  const ratio = 0.05;
+  const sw = Math.max(1, Math.round(width * ratio));
+  const sh = Math.max(1, Math.round(height * ratio));
+  const small = document.createElement("canvas");
+  small.width = sw;
+  small.height = sh;
+  const sCtx = small.getContext("2d")!;
+  sCtx.imageSmoothingEnabled = true;
+  sCtx.drawImage(image, 0, 0, sw, sh);
+  ctx.imageSmoothingEnabled = true;
+  ctx.imageSmoothingQuality = "high";
+  ctx.drawImage(small, 0, 0, width, height);
+  return canvas;
+}
+
 export function ImageEditor({
   source,
   onCancel,
@@ -66,13 +103,28 @@ export function ImageEditor({
   const blurredCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const maskCanvasRef = useRef<HTMLCanvasElement | null>(null);
   const effectCanvasRef = useRef<HTMLCanvasElement | null>(null);
-  const dragRef = useRef<{
+
+  // Crop mode — track all active pointers
+  const cropPointersRef = useRef<Map<number, { clientX: number; clientY: number }>>(new Map());
+  // Single-finger pan
+  const panRef = useRef<{
     pointerId: number;
-    clientX: number;
-    clientY: number;
-    offset: Point;
+    startClientX: number;
+    startClientY: number;
+    startOffset: Point;
   } | null>(null);
+  // Two-finger pinch
+  const pinchRef = useRef<{
+    startDistance: number;
+    startZoom: number;
+    startOffset: Point;
+    midCanvasX: number;
+    midCanvasY: number;
+  } | null>(null);
+
+  // Blur mode — track single brush pointer
   const blurPointerRef = useRef<number | null>(null);
+
   const [step, setStep] = useState<"crop" | "blur">("crop");
   const [sourceReady, setSourceReady] = useState(false);
   const [croppedReady, setCroppedReady] = useState(false);
@@ -80,6 +132,12 @@ export function ImageEditor({
   const [offset, setOffset] = useState<Point>({ x: 0, y: 0 });
   const [brushSize, setBrushSize] = useState(42);
   const [strokes, setStrokes] = useState<Stroke[]>([]);
+
+  // Always-current refs to avoid stale closures in pointer handlers
+  const zoomRef = useRef(zoom);
+  const offsetRef = useRef(offset);
+  useEffect(() => { zoomRef.current = zoom; }, [zoom]);
+  useEffect(() => { offsetRef.current = offset; }, [offset]);
 
   useEffect(() => {
     const image = new window.Image();
@@ -160,15 +218,7 @@ export function ImageEditor({
     if (!strokes.length) return;
 
     if (!blurredCanvasRef.current) {
-      const blurredCanvas = document.createElement("canvas");
-      blurredCanvas.width = OUTPUT_WIDTH;
-      blurredCanvas.height = OUTPUT_HEIGHT;
-      const blurredContext = blurredCanvas.getContext("2d");
-      if (!blurredContext) return;
-      blurredContext.filter = "blur(18px)";
-      blurredContext.drawImage(image, 0, 0, OUTPUT_WIDTH, OUTPUT_HEIGHT);
-      blurredContext.filter = "none";
-      blurredCanvasRef.current = blurredCanvas;
+      blurredCanvasRef.current = createBlurredCanvas(image, OUTPUT_WIDTH, OUTPUT_HEIGHT);
     }
 
     const maskCanvas = maskCanvasRef.current ?? document.createElement("canvas");
@@ -214,39 +264,91 @@ export function ImageEditor({
 
   const handlePointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     event.currentTarget.setPointerCapture(event.pointerId);
+
     if (step === "crop") {
-      dragRef.current = {
-        pointerId: event.pointerId,
+      cropPointersRef.current.set(event.pointerId, {
         clientX: event.clientX,
         clientY: event.clientY,
-        offset,
-      };
+      });
+
+      if (cropPointersRef.current.size >= 2) {
+        // Second finger down — switch to pinch, cancel any pan
+        panRef.current = null;
+        const rect = event.currentTarget.getBoundingClientRect();
+        const pts = Array.from(cropPointersRef.current.values());
+        const [p1, p2] = pts;
+        const distance = Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY);
+        const midClientX = (p1.clientX + p2.clientX) / 2;
+        const midClientY = (p1.clientY + p2.clientY) / 2;
+        pinchRef.current = {
+          startDistance: distance,
+          startZoom: zoomRef.current,
+          startOffset: offsetRef.current,
+          midCanvasX: ((midClientX - rect.left) / rect.width) * OUTPUT_WIDTH,
+          midCanvasY: ((midClientY - rect.top) / rect.height) * OUTPUT_HEIGHT,
+        };
+      } else {
+        // First finger — start pan
+        panRef.current = {
+          pointerId: event.pointerId,
+          startClientX: event.clientX,
+          startClientY: event.clientY,
+          startOffset: offsetRef.current,
+        };
+      }
       return;
     }
 
-    const stroke = { points: [getCanvasPoint(event)], size: brushSize };
-    blurPointerRef.current = event.pointerId;
-    setStrokes((current) => [...current, stroke]);
+    // Blur mode — only the first active pointer draws
+    if (blurPointerRef.current === null) {
+      const stroke = { points: [getCanvasPoint(event)], size: brushSize };
+      blurPointerRef.current = event.pointerId;
+      setStrokes((current) => [...current, stroke]);
+    }
   };
 
   const handlePointerMove = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     if (step === "crop") {
-      const drag = dragRef.current;
-      if (!drag || drag.pointerId !== event.pointerId) return;
-      const rect = event.currentTarget.getBoundingClientRect();
-      setOffset(
-        clampOffset(
+      cropPointersRef.current.set(event.pointerId, {
+        clientX: event.clientX,
+        clientY: event.clientY,
+      });
+
+      if (cropPointersRef.current.size >= 2 && pinchRef.current) {
+        const pinch = pinchRef.current;
+        const pts = Array.from(cropPointersRef.current.values());
+        const [p1, p2] = pts;
+        const distance = Math.hypot(p2.clientX - p1.clientX, p2.clientY - p1.clientY);
+        const ratio = distance / pinch.startDistance;
+        const nextZoom = Math.min(MAX_ZOOM, Math.max(MIN_ZOOM, pinch.startZoom * ratio));
+        const r = nextZoom / pinch.startZoom;
+        const { midCanvasX: cx, midCanvasY: cy, startOffset } = pinch;
+
+        // Keep the pinch midpoint fixed in canvas space while zooming
+        // Formula: newOffset = (cx - W/2) + r * (W/2 - cx + oldOffset)
+        const nextOffset = clampOffset(
           {
-            x:
-              drag.offset.x +
-              ((event.clientX - drag.clientX) / rect.width) * OUTPUT_WIDTH,
-            y:
-              drag.offset.y +
-              ((event.clientY - drag.clientY) / rect.height) * OUTPUT_HEIGHT,
+            x: cx - OUTPUT_WIDTH / 2 + r * (OUTPUT_WIDTH / 2 - cx + startOffset.x),
+            y: cy - OUTPUT_HEIGHT / 2 + r * (OUTPUT_HEIGHT / 2 - cy + startOffset.y),
           },
-          zoom,
-        ),
-      );
+          nextZoom,
+        );
+
+        setZoom(nextZoom);
+        setOffset(nextOffset);
+      } else if (cropPointersRef.current.size === 1 && panRef.current?.pointerId === event.pointerId) {
+        const pan = panRef.current;
+        const rect = event.currentTarget.getBoundingClientRect();
+        setOffset(
+          clampOffset(
+            {
+              x: pan.startOffset.x + ((event.clientX - pan.startClientX) / rect.width) * OUTPUT_WIDTH,
+              y: pan.startOffset.y + ((event.clientY - pan.startClientY) / rect.height) * OUTPUT_HEIGHT,
+            },
+            zoomRef.current,
+          ),
+        );
+      }
       return;
     }
 
@@ -262,7 +364,30 @@ export function ImageEditor({
   };
 
   const handlePointerEnd = (event: ReactPointerEvent<HTMLCanvasElement>) => {
-    if (dragRef.current?.pointerId === event.pointerId) dragRef.current = null;
+    if (step === "crop") {
+      cropPointersRef.current.delete(event.pointerId);
+
+      if (cropPointersRef.current.size < 2) {
+        pinchRef.current = null;
+      }
+
+      if (cropPointersRef.current.size === 1 && pinchRef.current === null) {
+        // One finger remains after pinch — restart pan from its current position
+        const [remainingId, remainingPos] = Array.from(cropPointersRef.current.entries())[0];
+        panRef.current = {
+          pointerId: remainingId,
+          startClientX: remainingPos.clientX,
+          startClientY: remainingPos.clientY,
+          startOffset: offsetRef.current,
+        };
+      }
+
+      if (cropPointersRef.current.size === 0) {
+        panRef.current = null;
+      }
+      return;
+    }
+
     if (blurPointerRef.current === event.pointerId) blurPointerRef.current = null;
   };
 
@@ -282,6 +407,9 @@ export function ImageEditor({
     image.src = croppedSource;
     setStrokes([]);
     setStep("blur");
+    cropPointersRef.current.clear();
+    panRef.current = null;
+    pinchRef.current = null;
   };
 
   const finishEditing = () => {
@@ -325,6 +453,7 @@ export function ImageEditor({
             className={step === "blur" ? "is-blurring" : undefined}
             width={OUTPUT_WIDTH}
             height={OUTPUT_HEIGHT}
+            style={{ touchAction: "none" }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerEnd}
@@ -336,7 +465,7 @@ export function ImageEditor({
 
         {step === "crop" ? (
           <div className="image-editor-controls">
-            <p>사진을 드래그하고 확대해 글씨를 프레임 안에 맞춰주세요.</p>
+            <p>사진을 드래그하거나 두 손가락으로 확대해 글씨를 프레임에 맞춰주세요.</p>
             <label className="image-editor-slider">
               <ZoomIn size={18} />
               <span>확대</span>
