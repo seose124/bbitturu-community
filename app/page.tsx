@@ -65,20 +65,22 @@ export default function HomePage() {
             )}
           </section>
 
-          <section>
-            <div className="section-heading">
-              <h2><img src="/icons/icon-hot.svg" className="section-icon" alt="" /> 인기 챌린지</h2>
-              <Link href="/challenges">전체보기 →</Link>
-            </div>
-            <div className="challenge-stack">
-              {hot.map((challenge) => (
-                <HomeChallengeCard
-                  challenge={challenge}
-                  key={challenge.id}
-                />
-              ))}
-            </div>
-          </section>
+          {hot.length > 0 && (
+            <section>
+              <div className="section-heading">
+                <h2><img src="/icons/icon-hot.svg" className="section-icon" alt="" /> 인기 챌린지</h2>
+                <Link href="/challenges">전체보기 →</Link>
+              </div>
+              <div className="challenge-stack">
+                {hot.map((challenge) => (
+                  <HomeChallengeCard
+                    challenge={challenge}
+                    key={challenge.id}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
 
           <section>
             <div className="section-heading section-heading-spaced">
