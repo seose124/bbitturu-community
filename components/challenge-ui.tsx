@@ -256,12 +256,16 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
 export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const timerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const isPausedRef = useRef(false);
+  const carouselRef = useRef<HTMLDivElement>(null);
 
   const resetTimer = () => {
     if (timerRef.current) clearInterval(timerRef.current);
     if (challenges.length <= 1) return;
     timerRef.current = setInterval(() => {
-      setActiveIndex((i) => (i + 1) % challenges.length);
+      if (!isPausedRef.current) {
+        setActiveIndex((i) => (i + 1) % challenges.length);
+      }
     }, 3000);
   };
 
@@ -271,13 +275,31 @@ export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [challenges.length]);
 
+  useEffect(() => {
+    const el = carouselRef.current;
+    if (!el) return;
+    const onFocusIn = () => { isPausedRef.current = true; };
+    const onFocusOut = (e: FocusEvent) => {
+      if (!el.contains(e.relatedTarget as Node)) isPausedRef.current = false;
+    };
+    el.addEventListener("focusin", onFocusIn);
+    el.addEventListener("focusout", onFocusOut);
+    return () => {
+      el.removeEventListener("focusin", onFocusIn);
+      el.removeEventListener("focusout", onFocusOut);
+    };
+  }, []);
+
   const goTo = (idx: number) => {
     setActiveIndex(idx);
     resetTimer();
   };
 
   return (
-    <div className="daily-carousel-root">
+    <div
+      ref={carouselRef}
+      className="daily-carousel-root"
+    >
       {/* mobile: single-card carousel */}
       <div className="daily-carousel-mobile">
         <div
