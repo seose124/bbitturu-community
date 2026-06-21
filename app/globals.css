@@ -607,8 +607,9 @@ p {
   flex: 0 0 auto;
 }
 
-.home-answer .button-row > .button-grow {
-  flex: 1.5;
+.home-answer .button-row {
+  display: grid;
+  grid-template-columns: minmax(0, 2fr) minmax(0, 3fr);
 }
 
 .input {

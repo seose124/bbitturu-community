@@ -176,7 +176,7 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
               모르겠어요
             </button>
             <button
-              className="button button-green button-small button-grow"
+              className="button button-green button-small"
               type="submit"
               disabled={!answer.trim() || submitting}
             >
