@@ -569,35 +569,42 @@ p {
   font-weight: 700;
 }
 
-.home-challenge-meta {
-  display: grid;
-  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
-  gap: 8px;
-}
-
-.home-challenge-meta p {
-  min-width: 0;
-  padding: 10px 12px;
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  background: var(--surface);
-}
-
-.home-challenge-meta span {
-  display: block;
-  margin-bottom: 3px;
+.home-challenge-author {
+  display: flex;
+  align-items: baseline;
+  gap: 4px;
+  padding: 0 2px;
   color: var(--dark-sub);
-  font-size: 10px;
-  font-weight: 700;
+  font-size: 13px;
+  line-height: 1.4;
 }
 
-.home-challenge-meta strong {
-  display: block;
-  color: var(--dark-text);
-  font-size: 12px;
+.home-challenge-author strong {
+  color: var(--primary);
   font-weight: 700;
-  line-height: 1.4;
   overflow-wrap: anywhere;
+}
+
+.home-answer > .input {
+  height: 58px;
+  border-radius: 14px;
+}
+
+.home-challenge-hint {
+  display: flex;
+  min-height: 48px;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border-radius: 12px;
+  background: #444c34;
+  color: var(--primary-dark);
+  font-size: 14px;
+  line-height: 1.4;
+}
+
+.home-challenge-hint svg {
+  flex: 0 0 auto;
 }
 
 .input {

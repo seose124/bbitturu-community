@@ -3,7 +3,7 @@
 import { useEffect, useRef, useState, type FormEvent } from "react";
 import Link from "next/link";
 import { trackChallengeSubmitted, trackChallengePassed } from "@/lib/analytics";
-import { Upload } from "lucide-react";
+import { Lightbulb, Upload } from "lucide-react";
 import {
   RATE_AGGREGATION_MIN_TRIES,
   difficultyClass,
@@ -152,15 +152,9 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
         </div>
       ) : (
         <form className="home-answer" onSubmit={submit}>
-          <div className="home-challenge-meta">
-            <p>
-              <span>출제자</span>
-              <strong>{challenge.author}</strong>
-            </p>
-            <p>
-              <span>힌트</span>
-              <strong>{challenge.hint || "등록된 힌트가 없어요"}</strong>
-            </p>
+          <div className="home-challenge-author">
+            <span>출제자:</span>
+            <strong>{challenge.author}</strong>
           </div>
           <input
             className="input"
@@ -169,16 +163,20 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
             placeholder="판독 결과를 입력하세요..."
             aria-label={`${challenge.author}의 악필 판독 결과`}
           />
+          <div className="home-challenge-hint">
+            <Lightbulb size={18} strokeWidth={2} aria-hidden="true" />
+            <span>{challenge.hint || "등록된 힌트가 없어요"}</span>
+          </div>
           <div className="button-row">
             <button
               className="button button-ghost button-small"
               type="button"
               onClick={() => showToast("다음 챌린지를 도전해보세요!")}
             >
-              모르겠어요 😅
+              모르겠어요
             </button>
             <button
-              className="button button-green button-small button-grow"
+              className="button button-green button-small"
               type="submit"
               disabled={!answer.trim() || submitting}
             >
