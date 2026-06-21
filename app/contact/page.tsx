@@ -42,7 +42,7 @@ export default function ContactPage() {
 
   if (sent) {
     return (
-      <Page>
+      <Page className="contact-page">
         <div className="page-column">
           <TopBar title="관리자 문의" backHref="/" />
           <div className="scroll-content contact-content" style={{ justifyContent: "center", alignItems: "center", textAlign: "center", gap: 12 }}>
@@ -59,7 +59,7 @@ export default function ContactPage() {
   }
 
   return (
-    <Page>
+    <Page className="contact-page">
       <div className="page-column">
         <TopBar title="관리자 문의" backHref="/" />
         <div className="scroll-content contact-content">

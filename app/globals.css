@@ -105,6 +105,41 @@ p {
   background: var(--surface);
 }
 
+.app-frame-document-scroll {
+  height: 100dvh;
+  min-height: 100dvh;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior-y: contain;
+  -webkit-overflow-scrolling: touch;
+}
+
+.app-frame-document-scroll .contact-page {
+  height: auto;
+  min-height: calc(100dvh - 64px - var(--safe-bottom));
+  overflow: visible;
+}
+
+.app-frame-document-scroll .contact-page .page-column {
+  height: auto;
+  min-height: 0;
+  overflow: visible;
+}
+
+.app-frame-document-scroll .contact-page .scroll-content {
+  min-height: 0;
+  flex: none;
+  overflow: visible;
+  touch-action: auto;
+}
+
+.app-frame-document-scroll > .bottom-nav {
+  position: static;
+  flex: 0 0 auto;
+  transform: none;
+  will-change: auto;
+}
+
 .page {
   width: 100%;
   height: 100%;
@@ -2317,6 +2352,10 @@ p {
 
 .contact-content {
   gap: 18px;
+}
+
+.contact-page .contact-content {
+  padding-bottom: 24px;
 }
 
 .contact-form-fields {

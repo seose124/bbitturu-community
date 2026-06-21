@@ -186,8 +186,11 @@ export function FloatingUpload() {
 }
 
 export function AppChrome({ children }: { children: ReactNode }) {
+  const pathname = usePathname();
+  const documentScroll = pathname === "/contact";
+
   return (
-    <div className="app-frame">
+    <div className={`app-frame${documentScroll ? " app-frame-document-scroll" : ""}`}>
       {children}
       <BottomNav />
       <FloatingUpload />
