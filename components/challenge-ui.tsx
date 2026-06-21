@@ -340,15 +340,17 @@ export function DailyCasesCarousel({ challenges }: { challenges: Challenge[] }) 
     >
       {/* mobile: single-card carousel */}
       <div className="daily-carousel-mobile">
-        <div
-          className="daily-carousel-track"
-          style={{ transform: `translateX(-${activeIndex * 100}%)` }}
-        >
-          {challenges.map((c, i) => (
-            <div className="daily-carousel-slide" key={c.id}>
-              <DailyChallengeCard challenge={c} index={i} />
-            </div>
-          ))}
+        <div className="daily-carousel-track-clip">
+          <div
+            className="daily-carousel-track"
+            style={{ transform: `translateX(-${activeIndex * 100}%)` }}
+          >
+            {challenges.map((c, i) => (
+              <div className="daily-carousel-slide" key={c.id}>
+                <DailyChallengeCard challenge={c} index={i} />
+              </div>
+            ))}
+          </div>
         </div>
         {challenges.length > 1 && (
           <div className="daily-carousel-dots">

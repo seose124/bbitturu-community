@@ -3497,7 +3497,10 @@ p {
 
 .daily-carousel-mobile {
   display: block;
-  overflow-x: hidden;
+}
+
+.daily-carousel-track-clip {
+  overflow: hidden;
 }
 
 .daily-carousel-track {
