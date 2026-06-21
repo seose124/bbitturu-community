@@ -85,7 +85,7 @@ export default function HomePage() {
 
           <section>
             <div className="section-heading section-heading-spaced">
-              <h2><img src="/icons/icon-new.svg" className="section-icon" alt="" /> 새로 올라왔어요</h2>
+              <h2>뭐라고 쓴 건지 읽어보세요</h2>
             </div>
             <div className="challenge-stack">
               {fresh.map((challenge) => (

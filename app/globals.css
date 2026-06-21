@@ -569,6 +569,37 @@ p {
   font-weight: 700;
 }
 
+.home-challenge-meta {
+  display: grid;
+  grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.6fr);
+  gap: 8px;
+}
+
+.home-challenge-meta p {
+  min-width: 0;
+  padding: 10px 12px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--surface);
+}
+
+.home-challenge-meta span {
+  display: block;
+  margin-bottom: 3px;
+  color: var(--dark-sub);
+  font-size: 10px;
+  font-weight: 700;
+}
+
+.home-challenge-meta strong {
+  display: block;
+  color: var(--dark-text);
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
 .input {
   width: 100%;
   height: 54px;

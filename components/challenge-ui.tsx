@@ -152,7 +152,16 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
         </div>
       ) : (
         <form className="home-answer" onSubmit={submit}>
-          <h3>뭐라고 쓴 건지 읽어보세요 🤔</h3>
+          <div className="home-challenge-meta">
+            <p>
+              <span>출제자</span>
+              <strong>{challenge.author}</strong>
+            </p>
+            <p>
+              <span>힌트</span>
+              <strong>{challenge.hint || "등록된 힌트가 없어요"}</strong>
+            </p>
+          </div>
           <input
             className="input"
             value={answer}
