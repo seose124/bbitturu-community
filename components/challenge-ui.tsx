@@ -56,7 +56,8 @@ export function ChallengeListItem({ challenge }: { challenge: Challenge }) {
         )}
         {completed ? (
           <div className="writing-complete-overlay" aria-hidden="true">
-            <img src="/icons/icon-challenge-complete.png" alt="" />
+            <img src="/icons/icon-challenge-complete-mark.png" alt="" />
+            <span>판독 완료</span>
           </div>
         ) : null}
       </div>
@@ -134,7 +135,8 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
         )}
         {completed ? (
           <div className="writing-complete-overlay" aria-hidden="true">
-            <img src="/icons/icon-challenge-complete.png" alt="" />
+            <img src="/icons/icon-challenge-complete-mark.png" alt="" />
+            <span>판독 완료</span>
           </div>
         ) : null}
       </div>
@@ -242,7 +244,8 @@ export function DailyChallengeCard({ challenge, index = 0 }: { challenge: Challe
         )}
         {attempt ? (
           <div className="writing-complete-overlay" aria-hidden="true">
-            <img src="/icons/icon-challenge-complete.png" alt="" />
+            <img src="/icons/icon-challenge-complete-mark.png" alt="" />
+            <span>판독 완료</span>
           </div>
         ) : null}
       </div>

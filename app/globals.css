@@ -485,17 +485,26 @@ p {
   z-index: 2;
   inset: 0;
   display: flex;
+  flex-direction: column;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   background: rgb(0 0 0 / 60%);
   pointer-events: none;
 }
 
 .writing-complete-overlay img {
   display: block;
-  width: 88px;
-  height: 64px;
+  width: 39px;
+  height: 39px;
   object-fit: contain;
+}
+
+.writing-complete-overlay span {
+  color: #fff;
+  font-size: 13px;
+  font-weight: 800;
+  line-height: 1.2;
 }
 
 .home-completed-state {
