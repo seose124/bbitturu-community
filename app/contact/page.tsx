@@ -23,12 +23,20 @@ export default function ContactPage() {
     }
     setSending(true);
     try {
-      const res = await fetch("/api/contact", {
+      const res = await fetch("https://api.web3forms.com/submit", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, type, content }),
+        body: JSON.stringify({
+          access_key: "e2ec0bbe-81d7-47e9-a1b9-b306600d0d5f",
+          subject: `[삐뚜루 문의] ${type}`,
+          name: name.trim() || "익명",
+          email: email.trim() || undefined,
+          type,
+          message: content.trim(),
+        }),
       });
-      if (!res.ok) throw new Error();
+      const data = await res.json();
+      if (!data.success) throw new Error();
       setSent(true);
       setName("");
       setEmail("");
