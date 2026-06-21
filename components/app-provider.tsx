@@ -95,6 +95,7 @@ type AppContextValue = {
   markReportSeen: (challengeId: number) => Promise<void>;
   dismissLoginPrompt: () => void;
   resetApp: () => void;
+  refreshChallenges: () => Promise<void>;
   showToast: (message: string) => void;
 };
 
@@ -468,12 +469,26 @@ export function AppProvider({ children }: { children: ReactNode }) {
     [challenges],
   );
 
+  const refreshChallenges = useCallback(async () => {
+    const { data, error } = await supabase
+      .from("challenges")
+      .select("*")
+      .order("created_at", { ascending: false });
+    if (!error && data) setChallenges(data.map(dbToChallenge));
+  }, []);
+
   const getChallengeReport = useCallback(
     (id: number) => {
       const challenge = challenges.find((item) => item.id === id);
+      // Exclude the challenge author's own attempts — they can't validly participate in their own challenge
+      const filtered = challenge?.authorId
+        ? reportAttempts.filter(
+            (a) => !(a.challengeId === id && a.userId === challenge.authorId),
+          )
+        : reportAttempts;
       // Re-derive correct from similarity when is_correct is missing (old schema rows)
       const enriched = challenge
-        ? reportAttempts.map((a) => ({
+        ? filtered.map((a) => ({
             ...a,
             correct:
               a.correct ||
@@ -481,7 +496,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
                 a.challengeId === id &&
                 answerSimilarity(challenge.answer, a.answer) > 0.55),
           }))
-        : reportAttempts;
+        : filtered;
       return buildChallengeReport(id, enriched, {
         tries: challenge?.tries ?? 0,
         successRate: challenge?.successRate ?? 0,
@@ -787,6 +802,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       markReportSeen,
       dismissLoginPrompt,
       resetApp,
+      refreshChallenges,
       showToast,
     }),
     [
@@ -814,6 +830,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
       markReportSeen,
       dismissLoginPrompt,
       resetApp,
+      refreshChallenges,
       showToast,
     ],
   );

@@ -123,19 +123,21 @@ export async function POST(request: NextRequest) {
   let successRate = Number(challenge.success_rate ?? 0);
 
   if (valid) {
-    // Count all non-passed attempts for this challenge
+    // Count non-passed attempts excluding the challenge author's own submissions
     const { count: validCount } = await admin
       .from("attempts")
       .select("id", { head: true, count: "exact" })
       .eq("challenge_id", challengeId)
-      .eq("passed", false);
+      .eq("passed", false)
+      .neq("user_id", challenge.author_id);
 
-    // Fetch answers to compute success rate
+    // Fetch answers to compute success rate (also excluding author)
     const { data: allAttempts } = await admin
       .from("attempts")
       .select("answer, user_id")
       .eq("challenge_id", challengeId)
-      .eq("passed", false);
+      .eq("passed", false)
+      .neq("user_id", challenge.author_id);
 
     tries = validCount ?? 0;
 

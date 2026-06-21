@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { FileText, Trash2, Upload } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useBbiduru } from "@/components/app-provider";
 import { Page, TopBar } from "@/components/layout";
 
@@ -20,7 +20,12 @@ export default function UploadsPage() {
     getChallengeReport,
     deleteChallenge,
     showToast,
+    refreshChallenges,
   } = useBbiduru();
+
+  useEffect(() => {
+    void refreshChallenges();
+  }, [refreshChallenges]);
   const [deletingId, setDeletingId] = useState<number | null>(null);
   const uploads = challenges
     .filter((challenge) => challenge.authorId === user?.id)

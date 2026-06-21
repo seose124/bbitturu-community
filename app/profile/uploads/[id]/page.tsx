@@ -18,11 +18,16 @@ export default function UploadReportPage() {
     getChallengeReport,
     markReportSeen,
     showToast,
+    refreshChallenges,
   } = useBbiduru();
   const challenge = getChallenge(challengeId);
   const report = getChallengeReport(challengeId);
   const uploaderLevel = getLevel("uploader", stats.uploaderXp);
   const isOwner = Boolean(user && challenge?.authorId === user.id);
+
+  useEffect(() => {
+    void refreshChallenges();
+  }, [refreshChallenges]);
 
   useEffect(() => {
     if (isOwner) void markReportSeen(challengeId);
