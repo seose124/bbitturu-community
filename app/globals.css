@@ -2315,14 +2315,6 @@ p {
   font-weight: 800;
 }
 
-.contact-form-wrap {
-  display: flex;
-  flex-direction: column;
-  flex: 1;
-  min-height: 0;
-  overflow: hidden;
-}
-
 .contact-content {
   gap: 18px;
 }

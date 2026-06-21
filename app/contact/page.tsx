@@ -62,7 +62,7 @@ export default function ContactPage() {
     <Page>
       <div className="page-column">
         <TopBar title="관리자 문의" backHref="/" />
-        <form onSubmit={submit} className="contact-form-wrap">
+        <form onSubmit={submit} style={{ display: "contents" }}>
           <div className="scroll-content contact-content">
             <div>
               <h1 className="page-heading">관리자에게 문의하기</h1>
