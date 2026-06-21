@@ -62,8 +62,8 @@ export default function ContactPage() {
     <Page>
       <div className="page-column">
         <TopBar title="관리자 문의" backHref="/" />
-        <form onSubmit={submit} style={{ display: "contents" }}>
-          <div className="scroll-content contact-content">
+        <div className="scroll-content contact-content">
+          <form className="contact-form-fields" onSubmit={submit}>
             <div>
               <h1 className="page-heading">관리자에게 문의하기</h1>
               <p className="page-subtitle">
@@ -122,8 +122,8 @@ export default function ContactPage() {
             <button className="button button-primary" type="submit" disabled={sending}>
               {sending ? "전송 중..." : "문의 보내기"}
             </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
     </Page>
   );

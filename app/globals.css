@@ -2319,6 +2319,12 @@ p {
   gap: 18px;
 }
 
+.contact-form-fields {
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+}
+
 .contact-textarea {
   min-height: 140px;
 }
