@@ -143,7 +143,7 @@ export async function POST(request: NextRequest) {
 
     if (allAttempts && allAttempts.length > 0) {
       const correctCount = allAttempts.filter(
-        (a) => answerSimilarity(String(challenge.answer), String(a.answer)) > 0.55,
+        (a) => answerSimilarity(String(challenge.answer), String(a.answer)) > 0.85,
       ).length;
       successRate = tries > 0 ? Math.round((correctCount / tries) * 100) : 0;
     }

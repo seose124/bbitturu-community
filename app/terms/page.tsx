@@ -2,7 +2,7 @@ import { InfoPage, InfoSection } from "@/components/info-page";
 
 export default function TermsPage() {
   return (
-    <InfoPage title="이용약관" date="시행일: 2025년 1월 1일">
+    <InfoPage title="이용약관" date="시행일: 2026년 6월 18일">
       <InfoSection title="제1조 목적">
         <p>
           본 약관은 삐뚜루가 제공하는 악필 판독 커뮤니티 서비스의 이용

@@ -105,6 +105,7 @@ const STATS_KEY = "bbiduru-user-stats";
 const REPORT_ATTEMPTS_KEY = "bbiduru-report-attempts";
 const NOTIFICATIONS_KEY = "bbiduru-notifications";
 const LOGIN_PROMPT_KEY = "bbiduru-login-prompt-seen";
+const DAILY_CHALLENGES_KEY = "bbiduru-daily-challenges";
 
 function normalizeStoredAttempts(value: string): Record<number, Attempt> {
   const parsed = JSON.parse(value) as Record<string, Partial<Attempt>>;
@@ -235,12 +236,14 @@ export function AppProvider({ children }: { children: ReactNode }) {
   const [reportAttempts, setReportAttempts] = useState<ReportAttempt[]>([]);
   const [stats, setStats] = useState<UserStats>(defaultUserStats);
   const [dailyChallengeId, setDailyChallengeId] = useState<number | null>(null);
+  const [dailyChallengeIds, setDailyChallengeIds] = useState<number[] | null>(null);
   const [notifications, setNotifications] = useState<AppNotification[]>([]);
   const [loginPrompt, setLoginPrompt] = useState<LoginPromptReason>(null);
   const [toast, setToast] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [clientInitialized, setClientInitialized] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const dailyInitRef = useRef(false);
 
   const isAnonymous = Boolean(user?.is_anonymous);
 
@@ -419,12 +422,44 @@ export function AppProvider({ children }: { children: ReactNode }) {
     return candidates[Math.abs(dayNumber) % candidates.length];
   }, [challenges, dailyChallengeId]);
 
+  // Initialize daily challenges from localStorage (24h lock) once challenges are loaded
+  useEffect(() => {
+    if (!hydrated || !challenges.length || dailyInitRef.current) return;
+    dailyInitRef.current = true;
+    const today = getKstDate();
+    try {
+      const stored = window.localStorage.getItem(DAILY_CHALLENGES_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored) as { date: string; ids: number[] };
+        if (parsed.date === today && Array.isArray(parsed.ids) && parsed.ids.length > 0) {
+          setDailyChallengeIds(parsed.ids);
+          return;
+        }
+      }
+    } catch { /* ignore */ }
+    const withTries = challenges.filter((c) => c.tries >= 3);
+    const pool = withTries.length >= 3 ? withTries : challenges;
+    const picked = [...pool].sort((a, b) => a.successRate - b.successRate).slice(0, 3);
+    const ids = picked.map((c) => c.id);
+    try {
+      window.localStorage.setItem(DAILY_CHALLENGES_KEY, JSON.stringify({ date: today, ids }));
+    } catch { /* ignore */ }
+    setDailyChallengeIds(ids);
+  }, [hydrated, challenges]);
+
   const dailyChallenges = useMemo(() => {
     if (!challenges.length) return [];
+    if (dailyChallengeIds) {
+      const resolved = dailyChallengeIds
+        .map((id) => challenges.find((c) => c.id === id))
+        .filter((c): c is Challenge => c !== undefined);
+      if (resolved.length > 0) return resolved;
+    }
+    // Fallback while IDs haven't loaded yet
     const withTries = challenges.filter((c) => c.tries >= 3);
     const pool = withTries.length >= 3 ? withTries : challenges;
     return [...pool].sort((a, b) => a.successRate - b.successRate).slice(0, 3);
-  }, [challenges]);
+  }, [dailyChallengeIds, challenges]);
 
   const dailyProgress =
     stats.dailyActivityDate === getKstDate()
@@ -494,7 +529,7 @@ export function AppProvider({ children }: { children: ReactNode }) {
               a.correct ||
               (!a.passed &&
                 a.challengeId === id &&
-                answerSimilarity(challenge.answer, a.answer) > 0.55),
+                answerSimilarity(challenge.answer, a.answer) > 0.85),
           }))
         : filtered;
       return buildChallengeReport(id, enriched, {

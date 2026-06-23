@@ -2320,6 +2320,7 @@ p {
 .about-hero .brand-font {
   color: #fff;
   font-size: 48px;
+  font-family: "BMKkubulim", sans-serif !important;
 }
 
 .about-hero p {
@@ -3241,7 +3242,6 @@ p {
   overflow: hidden;
   border-right: 1px solid var(--border);
   background: var(--surface);
-  padding: 10px;
 }
 
 .upload-report-thumb img {
@@ -3252,6 +3252,7 @@ p {
 
 .upload-report-thumb .handwriting {
   font-size: 15px;
+  padding: 10px;
 }
 
 .upload-report-info {

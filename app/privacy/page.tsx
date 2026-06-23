@@ -2,7 +2,7 @@ import { InfoPage, InfoSection } from "@/components/info-page";
 
 export default function PrivacyPage() {
   return (
-    <InfoPage title="개인정보 처리방침" date="시행일: 2025년 1월 1일">
+    <InfoPage title="개인정보 처리방침" date="시행일: 2026년 6월 18일">
       <p className="info-intro">
         삐뚜루(이하 &ldquo;서비스&rdquo;)는 개인정보보호법 등 관련 법령을
         준수하며, 이용자의 개인정보 보호를 최우선으로 합니다.
@@ -50,7 +50,7 @@ export default function PrivacyPage() {
       <InfoSection title="제6조 이용자 권리">
         <p>
           이용자는 언제든 개인정보 열람, 정정, 삭제, 처리정지를 요청할 수
-          있습니다. 문의: privacy@bbiduru.app
+          있습니다.
         </p>
       </InfoSection>
     </InfoPage>

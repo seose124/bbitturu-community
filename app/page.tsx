@@ -14,14 +14,15 @@ import { Page, TopBar } from "@/components/layout";
 
 export default function HomePage() {
   const [drawerOpen, setDrawerOpen] = useState(false);
-  const { challenges, dailyChallenges, dailyProgress, stats, unreadCount } =
+  const { challenges, dailyChallenges, dailyProgress, stats, unreadCount, attempts } =
     useBbiduru();
   const hot = challenges
     .filter((challenge) => challenge.tags.includes("hot"))
     .slice(0, 3);
-  const fresh = challenges
-    .filter((challenge) => challenge.tags.includes("new"))
-    .slice(0, 2);
+  const dailyIds = new Set(dailyChallenges.map((c) => c.id));
+  const unsolved = challenges
+    .filter((challenge) => !attempts[challenge.id] && !dailyIds.has(challenge.id))
+    .slice(0, 5);
 
   return (
     <Page dark>
@@ -83,19 +84,21 @@ export default function HomePage() {
             </section>
           )}
 
-          <section>
-            <div className="section-heading section-heading-spaced">
-              <h2>뭐라고 쓴 건지 읽어보세요</h2>
-            </div>
-            <div className="challenge-stack">
-              {fresh.map((challenge) => (
-                <HomeChallengeCard
-                  challenge={challenge}
-                  key={challenge.id}
-                />
-              ))}
-            </div>
-          </section>
+          {unsolved.length > 0 && (
+            <section>
+              <div className="section-heading section-heading-spaced">
+                <h2>뭐라고 쓴 건지 읽어보세요</h2>
+              </div>
+              <div className="challenge-stack">
+                {unsolved.map((challenge) => (
+                  <HomeChallengeCard
+                    challenge={challenge}
+                    key={challenge.id}
+                  />
+                ))}
+              </div>
+            </section>
+          )}
         </div>
       </div>
       <HomeDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} />

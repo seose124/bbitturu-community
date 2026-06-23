@@ -113,7 +113,7 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
     mountTimeRef.current = Date.now();
   }, []);
 
-  const submit = async (event: FormEvent) => {
+  const submit = (event: FormEvent) => {
     event.preventDefault();
     if (!answer.trim() || submitting) return;
     setSubmitting(true);
@@ -121,7 +121,9 @@ export function HomeChallengeCard({ challenge }: { challenge: Challenge }) {
       ? Math.round((Date.now() - mountTimeRef.current) / 1000)
       : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
-    await saveAttempt(challenge.id, answer.trim());
+    void saveAttempt(challenge.id, answer.trim()).catch(() => {
+      showToast("기록 저장에 실패했어요. 다시 시도해주세요");
+    });
     router.push(`/challenges/${challenge.id}/result`);
   };
 
