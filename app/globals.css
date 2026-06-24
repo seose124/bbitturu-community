@@ -961,7 +961,7 @@ p {
   display: flex;
   flex-direction: column;
   gap: 16px;
-  padding: 14px 20px calc(64px + var(--safe-bottom));
+  padding: 14px 20px;
 }
 
 .challenge-play > * {
@@ -1117,6 +1117,10 @@ p {
 /* 글자별 색상 구분 */
 .char-correct {
   color: #D0F879;
+}
+
+.char-wrong {
+  color: #ffffff;
 }
 
 /* 판독 성공률 바 + 평균 마커 */
@@ -1323,7 +1327,7 @@ p {
   align-items: center;
   gap: 5px;
   border-radius: 999px;
-  background: var(--accent);
+  background: var(--primary);
   padding: 0 14px;
   color: var(--ink);
   cursor: pointer;
@@ -1394,6 +1398,17 @@ p {
   padding: 18px;
 }
 
+.share-writing-image {
+  padding: 0;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.share-writing-image .share-writing-img {
+  max-height: 280px;
+  border-radius: 11px;
+}
+
 .share-writing .handwriting {
   color: rgb(238 234 225 / 65%);
   font-size: 24px;
@@ -1461,6 +1476,34 @@ p {
   border: 1px solid var(--dark-border);
   background: var(--dark-card);
   color: var(--dark-sub);
+}
+
+.share-my-answer {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  border-color: var(--dark-border);
+  background: var(--dark-card);
+  padding: 16px 18px;
+}
+
+.share-my-answer > span {
+  color: var(--dark-sub);
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.share-my-answer > strong {
+  color: var(--dark-text);
+  font-size: 22px;
+  line-height: 1.4;
+  overflow-wrap: anywhere;
+}
+
+.share-try-button {
+  width: 100%;
+  background: var(--primary);
+  color: var(--ink);
 }
 
 .share-copy-secondary {

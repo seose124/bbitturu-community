@@ -22,9 +22,9 @@ function editDistance(a: string, b: string) {
   return matrix[a.length][b.length];
 }
 
-/** 전체 글자수 대비 위치가 일치하는 글자수 비율 (공백 제외) */
+/** 전체 글자수 대비 위치가 일치하는 글자수 비율 (공백·마침표·쉼표 제외, 대소문자 구분 없음) */
 export function charMatchRate(answer: string, attempt: string): number {
-  const normalize = (v: string) => v.replace(/\s/g, "");
+  const normalize = (v: string) => v.replace(/[\s.,]/g, "").toLocaleLowerCase("ko-KR");
   const a = normalize(answer);
   const b = normalize(attempt);
   if (!a.length) return 0;
@@ -37,7 +37,7 @@ export function charMatchRate(answer: string, attempt: string): number {
 
 export function answerSimilarity(answer: string, attempt: string) {
   const normalize = (value: string) =>
-    value.replace(/\s/g, "").toLocaleLowerCase("ko-KR");
+    value.replace(/[\s.,]/g, "").toLocaleLowerCase("ko-KR");
   const a = normalize(answer);
   const b = normalize(attempt);
 

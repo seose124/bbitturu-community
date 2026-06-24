@@ -131,7 +131,8 @@ export default function ChallengePage() {
             <div className="progress-fill" style={{ width: `${progress}%` }} />
           </div>
         </div>
-        <div className="scroll-content challenge-play">
+        <div className="scroll-content">
+          <div className="challenge-play">
           <article className="card outlined">
             <div className="challenge-stage">
               {dailyChallenge?.id === challenge.id ? (
@@ -185,6 +186,7 @@ export default function ChallengePage() {
           </article>
           <div className="streak">
             <Flame size={14} fill="currentColor" /> {stats.currentCombo} 콤보 · 연속 활동 {stats.activityStreak}일
+          </div>
           </div>
         </div>
       </div>
