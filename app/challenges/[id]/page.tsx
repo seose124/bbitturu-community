@@ -48,6 +48,11 @@ export default function ChallengePage() {
     trackChallengeClicked(challenge.id, entrySource);
   }, [challenge]);
 
+  useEffect(() => {
+    if (!challenge) return;
+    router.prefetch(`/challenges/${challenge.id}/result`);
+  }, [challenge, router]);
+
   if (!challenge) {
     return (
       <Page>
@@ -79,18 +84,22 @@ export default function ChallengePage() {
       ? Math.round((Date.now() - mountTimeRef.current) / 1000)
       : 0;
     trackChallengeSubmitted(challenge.id, answer.trim().length, timeSpent);
-    await saveAttempt(challenge.id, answer.trim());
+    void saveAttempt(challenge.id, answer.trim()).catch(() => {
+      showToast("기록 저장에 실패했어요. 다시 시도해주세요");
+    });
     router.push(`/challenges/${challenge.id}/result`);
   };
 
-  const pass = async () => {
+  const pass = () => {
     if (submitting) return;
     setSubmitting(true);
     const timeSpent = mountTimeRef.current
       ? Math.round((Date.now() - mountTimeRef.current) / 1000)
       : 0;
     trackChallengePassed(challenge.id, timeSpent, answer.length > 0);
-    await saveAttempt(challenge.id, "", true);
+    void saveAttempt(challenge.id, "", true).catch(() => {
+      showToast("기록 저장에 실패했어요. 다시 시도해주세요");
+    });
     router.push(`/challenges/${challenge.id}/result`);
   };
 
