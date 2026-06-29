@@ -37,6 +37,22 @@ export default function ChallengePage() {
   }, []);
 
   useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    let wasOpen = false;
+    const onResize = () => {
+      const open = window.innerHeight - vv.height > 150;
+      if (open && !wasOpen) {
+        const scrollEl = document.querySelector(".scroll-content") as HTMLElement | null;
+        if (scrollEl) requestAnimationFrame(() => { scrollEl.scrollTop = 0; });
+      }
+      wasOpen = open;
+    };
+    vv.addEventListener("resize", onResize);
+    return () => vv.removeEventListener("resize", onResize);
+  }, []);
+
+  useEffect(() => {
     if (clickTrackedRef.current || !challenge) return;
     clickTrackedRef.current = true;
     const referrer = document.referrer;

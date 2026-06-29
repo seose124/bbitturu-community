@@ -1040,6 +1040,17 @@ p {
   font-weight: 800;
 }
 
+/* Keyboard open on mobile: compact image to show image + form together */
+body.keyboard-open .challenge-stage {
+  min-height: 120px;
+}
+body.keyboard-open .paper-image {
+  max-height: 140px;
+}
+body.keyboard-open .scroll-content {
+  padding-bottom: 16px;
+}
+
 .result-content {
   display: flex;
   flex-direction: column;

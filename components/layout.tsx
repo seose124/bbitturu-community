@@ -106,6 +106,23 @@ export function TopBar({
 export function BottomNav() {
   const pathname = usePathname();
   const [visible, setVisible] = useState(true);
+  const [keyboardOpen, setKeyboardOpen] = useState(false);
+
+  useEffect(() => {
+    const vv = window.visualViewport;
+    if (!vv) return;
+    const onResize = () => {
+      if (window.innerWidth >= 768) return;
+      const open = window.innerHeight - vv.height > 150;
+      setKeyboardOpen(open);
+      document.body.classList.toggle("keyboard-open", open);
+    };
+    vv.addEventListener("resize", onResize);
+    return () => {
+      vv.removeEventListener("resize", onResize);
+      document.body.classList.remove("keyboard-open");
+    };
+  }, []);
 
   useEffect(() => {
     queueMicrotask(() => setVisible(true));
@@ -127,7 +144,7 @@ export function BottomNav() {
 
   return (
     <nav
-      className={`bottom-nav${visible ? "" : " bottom-nav-hidden"}`}
+      className={`bottom-nav${visible && !keyboardOpen ? "" : " bottom-nav-hidden"}`}
       aria-label="주요 메뉴"
     >
       {navItems.map((item) => {
