@@ -73,7 +73,7 @@ export default function ChallengePage() {
     return (
       <Page>
         <div className="page-column">
-          <TopBar title="판독 챌린지" backHref="/challenges" />
+          <TopBar title="악필 판독" backHref="/challenges" />
           <div className="empty-state fill">
             <strong>챌린지를 찾을 수 없어요</strong>
             <button
@@ -136,7 +136,7 @@ export default function ChallengePage() {
     <Page>
       <div className="page-column">
         <TopBar
-          title={`${index + 1} / ${challenges.length}`}
+          title="악필 판독"
           backHref="/challenges"
           right={
             canDelete ? (

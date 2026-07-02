@@ -1326,6 +1326,66 @@ body.keyboard-open .scroll-content {
   text-align: center;
 }
 
+.challenge-complete-content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 20px calc(72px + var(--safe-bottom));
+}
+
+.challenge-complete-card {
+  display: flex;
+  width: 100%;
+  max-width: 420px;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 32px 22px;
+  text-align: center;
+}
+
+.challenge-complete-logo {
+  display: flex;
+  width: 56px;
+  height: 56px;
+  align-items: center;
+  justify-content: center;
+}
+
+.challenge-complete-logo-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+.challenge-complete-card strong {
+  display: block;
+  color: #ffffff;
+  font-size: 22px;
+  line-height: 1.35;
+}
+
+.challenge-complete-card p {
+  margin-top: 8px;
+  color: var(--ink-sub);
+  font-size: 14px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
+.challenge-complete-actions {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.challenge-complete-actions .button-primary {
+  background: #c0fd4f;
+  color: #11130f;
+  box-shadow: none;
+}
+
 .divider {
   height: 1px;
   flex: 0 0 auto;

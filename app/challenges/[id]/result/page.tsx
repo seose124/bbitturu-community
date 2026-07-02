@@ -9,6 +9,7 @@ import { trackAnswerRevealed, trackCrowdInterestClicked } from "@/lib/analytics"
 import { Page, TopBar } from "@/components/layout";
 import { comboMilestoneMessage } from "@/lib/progression";
 import { answerSimilarity, charMatchRate } from "@/lib/similarity";
+import { ColorizedAnswer } from "@/components/colorized-answer";
 import { createClient } from "@/lib/supabase";
 import {
   emptyReactionCounts,
@@ -16,41 +17,6 @@ import {
   type ReactionKey,
 } from "@/lib/reactions";
 
-function ColorizedAnswer({
-  answer,
-  attempt,
-}: {
-  answer: string;
-  attempt: string;
-}) {
-  const normAnswer = answer.replace(/[\s.,]/g, "").toLocaleLowerCase("ko-KR");
-  let normIdx = 0;
-
-  const chars = attempt.split("").map((char) => {
-    if (char === " " || char === "." || char === ",")
-      return { char, correct: null as boolean | null };
-    const normChar = char.toLocaleLowerCase("ko-KR");
-    const correct = normIdx < normAnswer.length && normChar === normAnswer[normIdx];
-    normIdx++;
-    return { char, correct };
-  });
-
-  return (
-    <>
-      &ldquo;
-      {chars.map((item, i) =>
-        item.correct === null ? (
-          <span key={i}> </span>
-        ) : (
-          <span key={i} className={item.correct ? "char-correct" : "char-wrong"}>
-            {item.char}
-          </span>
-        ),
-      )}
-      &rdquo;
-    </>
-  );
-}
 
 function ResultPreview({
   imageData,
@@ -141,6 +107,22 @@ export default function ResultPage() {
     return Math.round(charMatchRate(challenge.answer, attempt.answer) * 100);
   }, [challenge, attempt]);
 
+  const nextChallenge = useMemo(() => {
+    if (!challenge || challenges.length <= 1) return undefined;
+    const currentIndex = challenges.findIndex((item) => item.id === challenge.id);
+    const orderedChallenges =
+      currentIndex >= 0
+        ? [
+            ...challenges.slice(currentIndex + 1),
+            ...challenges.slice(0, currentIndex),
+          ]
+        : challenges;
+
+    return orderedChallenges.find(
+      (item) => item.id !== challenge.id && !attempts[item.id],
+    );
+  }, [attempts, challenge, challenges]);
+
   useEffect(() => {
     const milestone = comboMilestoneMessage(attempt?.comboAfter ?? 0);
     if (correct && !milestone) showToast("정답이에요! 대단해요");
@@ -159,8 +141,6 @@ export default function ResultPage() {
     );
   }
 
-  const currentIndex = challenges.findIndex((item) => item.id === challenge.id);
-  const nextChallenge = challenges[(currentIndex + 1) % challenges.length];
   const avgRate = Math.min(100, Math.max(0, Math.round(challenge.successRate)));
   const hasCommunityAverage = challenge.tries >= 5;
   const displayedAvgRate = hasCommunityAverage ? avgRate : 0;
@@ -358,7 +338,13 @@ export default function ResultPage() {
           {/* 7. 다음 챌린지 도전 */}
           <button
             className="button button-accent result-next-link"
-            onClick={() => router.push(`/challenges/${nextChallenge.id}`)}
+            onClick={() =>
+              router.push(
+                nextChallenge
+                  ? `/challenges/${nextChallenge.id}`
+                  : "/challenges/completed",
+              )
+            }
           >
             다음 챌린지 도전 →
           </button>
